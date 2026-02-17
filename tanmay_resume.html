@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanmay Kalbande - Resume</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .resume-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: white;
+            color: #333;
+            padding: 40px 50px;
+            border-bottom: 3px solid #333;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        
+        .header .title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .contact-info a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 2px solid #333;
+            transition: opacity 0.3s;
+        }
+        
+        .contact-info a:hover {
+            opacity: 0.6;
+        }
+        
+        .content {
+            padding: 40px 50px;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .summary {
+            font-size: 15px;
+            line-height: 1.7;
+            text-align: justify;
+        }
+        
+        .experience-item {
+            margin-bottom: 25px;
+            border-left: 3px solid #333;
+            padding-left: 20px;
+        }
+        
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .job-title {
+            font-size: 17px;
+            font-weight: 900;
+        }
+        
+        .company {
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        
+        .duration {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .duties {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        
+        .duties li {
+            font-size: 14px;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .skill-category {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .skill-category strong {
+            font-weight: 900;
+        }
+        
+        .project-item {
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            border-left: 3px solid #333;
+            padding-left: 20px;
+        }
+        
+        .project-title {
+            font-weight: 900;
+            font-size: 15px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .certifications-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
+        }
+        
+        .cert-item {
+            font-size: 14px;
+            padding: 5px 0;
+            font-weight: 600;
+        }
+        
+        .download-section {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            margin-top: 20px;
+            border-top: 3px solid #333;
+        }
+        
+        .download-btn {
+            background: #333;
+            color: white;
+            padding: 14px 40px;
+            border: 3px solid #333;
+            border-radius: 0;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .download-btn:hover {
+            background: white;
+            color: #333;
+        }
+        
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header, .content {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 26px;
+            }
+            
+            .header .title {
+                font-size: 16px;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                gap: 8px;
+                font-size: 13px;
+            }
+            
+            .section-title {
+                font-size: 18px;
+            }
+            
+            .experience-header {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .skills-grid, .certifications-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .contact-info {
+                font-size: 12px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .resume-container {
+                border: none;
+            }
+            
+            .download-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="resume-container">
+        <div class="header">
+            <h1>TANMAY KALBANDE</h1>
+            <div class="title">Data Scientist & Software Engineer</div>
+            <div class="contact-info">
+                <span>📧 kalbandetanmay@gmail.com</span>
+                <span>📱 737-838-1494</span>
+                <span><a href="https://www.linkedin.com/in/tanmay-kalbande" target="_blank">LinkedIn</a></span>
+                <span><a href="https://github.com/tanmay-kalbande" target="_blank">GitHub</a></span>
+                <span><a href="https://tanmay-kalbande.vercel.app/" target="_blank">Portfolio</a></span>
+                <span>📍 Nagpur, Maharashtra</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">Professional Summary</h2>
+                <p class="summary">
+                    Software Engineer with 1.8 years of experience building AI systems and data-driven solutions. Proven track record in developing multi-agent AI systems, predictive models, and customer segmentation tools that deliver measurable business impact. Skilled in Python, SQL, and machine learning frameworks, with hands-on experience deploying production-grade solutions that improve operational efficiency and decision-making.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Professional Experience</h2>
+                
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <div>
+                            <div class="job-title">Software Engineer</div>
+                            <div class="company">Capgemini</div>
+                        </div>
+                        <div class="duration">Apr 2024 - Present</div>
+                    </div>
+                    <ul class="duties">
+                        <li>Developed multi-agent AI work note formatter using Flask and AI models, transforming unstructured service desk notes into structured knowledge base entries, reducing resolution time by 35%</li>
+                        <li>Built real-time quality assurance pipeline with dual AI agents, improving knowledge base reliability by 60% through automated error detection and validation</li>
+                        <li>Designed knowledge generation engine that enhanced team documentation accessibility by 45%, streamlining information retrieval processes</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <div>
+                            <div class="job-title">Data Analyst Trainee</div>
+                            <div class="company">Rubixe</div>
+                        </div>
+                        <div class="duration">Nov 2022 - Dec 2023</div>
+                    </div>
+                    <ul class="duties">
+                        <li>Built predictive maintenance models using Random Forest algorithm, reducing equipment downtime by 25% and minimizing operational costs</li>
+                        <li>Developed customer segmentation system using K-Means clustering, enabling targeted marketing strategies and improving campaign effectiveness</li>
+                        <li>Created lead scoring models with 85% accuracy, increasing sales team efficiency by 20% through improved prospect prioritization</li>
+                        <li>Implemented movie recommendation system using collaborative filtering techniques, analyzing user rating patterns to deliver personalized content suggestions</li>
+                        <li>Designed interactive Tableau dashboards that transformed complex datasets into actionable business insights for stakeholders</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Technical Skills</h2>
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <strong>Languages:</strong> Python, SQL, R, C
+                    </div>
+                    <div class="skill-category">
+                        <strong>Databases:</strong> SQL Server, Spark
+                    </div>
+                    <div class="skill-category">
+                        <strong>ML/AI:</strong> Random Forest, K-Means, Collaborative Filtering, Multi-Agent Systems
+                    </div>
+                    <div class="skill-category">
+                        <strong>Visualization:</strong> Tableau, PowerBI, Matplotlib, Seaborn
+                    </div>
+                    <div class="skill-category">
+                        <strong>Frameworks:</strong> Flask, NumPy, Pandas, Scikit-learn
+                    </div>
+                    <div class="skill-category">
+                        <strong>Big Data:</strong> Hadoop, Spark
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Key Projects</h2>
+                <div class="project-item">
+                    <span class="project-title">Pustakam - AI Book Writer</span>
+                    Built AI-powered book generation engine that creates structured, context-aware books on any topic. Features sequential generation with memory retention and supports multiple AI models for privacy-focused, local-first operation.
+                </div>
+                <div class="project-item">
+                    <span class="project-title">AI-Tutor</span>
+                    Developed personalized AI tutoring platform using Google's Gemma model with multiple teaching personas, context-aware quiz generation, and interactive learning flowcharts.
+                </div>
+                <div class="project-item">
+                    <span class="project-title">Web Traffic Analysis</span>
+                    Performed comprehensive web traffic analysis for Zoompare using Python and Google Analytics, implementing A/B testing frameworks to identify conversion bottlenecks.
+                </div>
+                <div class="project-item">
+                    <span class="project-title">Bias & Fairness Checker</span>
+                    Created AI tool to detect potential biases in text and suggest inclusive language alternatives, advancing ethical AI development practices.
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Certifications</h2>
+                <div class="certifications-list">
+                    <div class="cert-item">• AWS Cloud Technical Essentials (Dec 2024)</div>
+                    <div class="cert-item">• Certified Data Scientist - IABAC (Sep 2023)</div>
+                    <div class="cert-item">• Foundations: Data, Data, Everywhere - Google (Apr 2024)</div>
+                    <div class="cert-item">• Data Science Foundation - IABAC (Aug 2023)</div>
+                    <div class="cert-item">• Technical Support Fundamentals - Google (Dec 2023)</div>
+                    <div class="cert-item">• Certified Data Scientist - DataMites™ (Apr 2023)</div>
+                </div>
+            </div>
+
+            <div class="download-section">
+                <button class="download-btn" onclick="window.print()">Download PDF</button>
+                <p style="font-size: 13px; margin-top: 12px; font-weight: 600;">Use Ctrl+P / Cmd+P and select "Save as PDF"</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
