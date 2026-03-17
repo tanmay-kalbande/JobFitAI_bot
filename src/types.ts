@@ -67,7 +67,7 @@ export interface CustomSection {
   items: string[];
 }
 
-export type AIProvider = 'google' | 'cerebras' | 'mistral' | 'groq' | 'nvidia' | 'cloudflare';
+export type AIProvider = 'google' | 'cerebras' | 'mistral' | 'groq';
 
 export type ResumeFormat = 'classic' | 'modern';
 
@@ -96,15 +96,10 @@ export interface AISettings {
   cerebrasApiKey: string;
   mistralApiKey: string;
   groqApiKey: string;
-  nvidiaApiKey: string;
-  cloudflareAccountId: string;
-  cloudflareApiToken: string;
   googleModel: string;
   cerebrasModel: string;
   mistralModel: string;
   groqModel: string;
-  nvidiaModel: string;
-  cloudflareModel: string;
 }
 
 export const DEFAULT_SETTINGS: AISettings = {
@@ -114,15 +109,10 @@ export const DEFAULT_SETTINGS: AISettings = {
   cerebrasApiKey: '',
   mistralApiKey: '',
   groqApiKey: '',
-  nvidiaApiKey: '',
-  cloudflareAccountId: '',
-  cloudflareApiToken: '',
   googleModel: 'gemini-3-flash-preview',
   cerebrasModel: 'gpt-oss-120b',
   mistralModel: 'mistral-small-latest',
-  groqModel: 'llama-3.3-70b-versatile',
-  nvidiaModel: 'nemotron-3-super-120b-a12b',
-  cloudflareModel: '@cf/openai/gpt-oss-120b'
+  groqModel: 'llama-3.3-70b-versatile'
 };
 
 // Model options for each provider
@@ -153,13 +143,7 @@ export const GROQ_MODELS = [
   { value: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
 ];
 
-export const NVIDIA_MODELS = [
-  { value: 'nemotron-3-super-120b-a12b', label: 'Nemotron-3 Super 120B' },
-];
 
-export const CLOUDFLARE_MODELS = [
-  { value: '@cf/openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
-];
 
 // Edit log for tracking manual changes
 export interface ResumeEditLog {

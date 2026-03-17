@@ -110,14 +110,7 @@ function App() {
       setError('Please configure your Groq API key in Settings');
       return false;
     }
-    if (settings.provider === 'nvidia' && !settings.nvidiaApiKey) {
-      setError('Please configure your Nvidia API key in Settings');
-      return false;
-    }
-    if (settings.provider === 'cloudflare' && (!settings.cloudflareApiToken || !settings.cloudflareAccountId)) {
-      setError('Please configure your Cloudflare Account ID and API Token in Settings');
-      return false;
-    }
+
     return true;
   };
 
@@ -356,8 +349,6 @@ function App() {
       case 'cerebras': return 'Cerebras';
       case 'mistral': return 'Mistral AI';
       case 'groq': return 'Groq';
-      case 'nvidia': return 'Nvidia NIM';
-      case 'cloudflare': return 'Cloudflare Workers AI';
     }
   };
 

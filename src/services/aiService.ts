@@ -5,7 +5,7 @@ const GOOGLE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 const CEREBRAS_API_URL = 'https://api.cerebras.ai/v1/chat/completions';
 const MISTRAL_API_URL = 'https://api.mistral.ai/v1/chat/completions';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const NVIDIA_API_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
+
 
 // Retry utility with exponential backoff
 async function retryWithBackoff<T>(
@@ -134,51 +134,7 @@ async function callGroqAI(prompt: string, settings: AISettings): Promise<string>
     return data.choices?.[0]?.message?.content || '';
 }
 
-async function callNvidiaAI(prompt: string, settings: AISettings): Promise<string> {
-    const response = await fetch(NVIDIA_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${settings.nvidiaApiKey}`,
-        },
-        body: JSON.stringify({
-            model: settings.nvidiaModel,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: APP_CONSTANTS.AI_TEMPERATURE,
-            max_tokens: APP_CONSTANTS.MAX_OUTPUT_TOKENS,
-        }),
-    });
 
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Nvidia API error: ${error}`);
-    }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || '';
-}
-
-async function callCloudflareAI(prompt: string, settings: AISettings): Promise<string> {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${settings.cloudflareAccountId}/ai/run/${settings.cloudflareModel}`;
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${settings.cloudflareApiToken}`,
-        },
-        body: JSON.stringify({
-            messages: [{ role: 'user', content: prompt }],
-        }),
-    });
-
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Cloudflare API error: ${error}`);
-    }
-
-    const data = await response.json();
-    return data.result?.response || data.result?.text || data.result || '';
-}
 
 export async function callAI(prompt: string, settings: AISettings): Promise<string> {
     // Cancel any existing request
@@ -195,13 +151,7 @@ export async function callAI(prompt: string, settings: AISettings): Promise<stri
         } else if (settings.provider === 'groq') {
             if (!settings.groqApiKey) throw new Error('Groq API key is required');
             return callGroqAI(prompt, settings);
-        } else if (settings.provider === 'nvidia') {
-            if (!settings.nvidiaApiKey) throw new Error('Nvidia API key is required');
-            return callNvidiaAI(prompt, settings);
-        } else if (settings.provider === 'cloudflare') {
-            if (!settings.cloudflareApiToken) throw new Error('Cloudflare API Token is required');
-            if (!settings.cloudflareAccountId) throw new Error('Cloudflare Account ID is required');
-            return callCloudflareAI(prompt, settings);
+
         } else {
             if (!settings.mistralApiKey) throw new Error('Mistral API key is required');
             return callMistralAI(prompt, settings);

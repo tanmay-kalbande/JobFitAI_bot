@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AISettings, AIProvider } from '../types';
-import { GOOGLE_MODELS, CEREBRAS_MODELS, MISTRAL_MODELS, GROQ_MODELS, NVIDIA_MODELS, CLOUDFLARE_MODELS } from '../types';
+import { GOOGLE_MODELS, CEREBRAS_MODELS, MISTRAL_MODELS, GROQ_MODELS } from '../types';
 import { CustomDropdown } from './CustomDropdown';
 
 interface SettingsModalProps {
@@ -94,28 +94,7 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                                 <img src="/groq.svg" alt="Groq" className="tab-icon-img" />
                                 Groq
                             </button>
-                            <button
-                                type="button"
-                                className={`tab ${activeTab === 'nvidia' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('nvidia');
-                                    setLocalSettings({ ...localSettings, provider: 'nvidia' });
-                                }}
-                            >
-                                <img src="/nvidia.svg" alt="Nvidia" className="tab-icon-img" />
-                                Nvidia
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab ${activeTab === 'cloudflare' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('cloudflare');
-                                    setLocalSettings({ ...localSettings, provider: 'cloudflare' });
-                                }}
-                            >
-                                <img src="/cloudflare.svg" alt="Cloudflare" className="tab-icon-img" />
-                                Cloudflare
-                            </button>
+
                         </div>
 
                         {/* Google Settings */}
@@ -226,71 +205,9 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                             </div>
                         )}
 
-                        {/* Nvidia Settings */}
-                        {activeTab === 'nvidia' && (
-                            <div className="provider-settings">
-                                <div className="form-group">
-                                    <label>API Key</label>
-                                    <input
-                                        type="password"
-                                        value={localSettings.nvidiaApiKey || ''}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, nvidiaApiKey: e.target.value })
-                                        }
-                                        placeholder="Enter your Nvidia NIM API key"
-                                    />
-                                    <span className="hint">Get from: build.nvidia.com</span>
-                                </div>
 
-                                <div className="form-group">
-                                    <label>Model</label>
-                                    <CustomDropdown
-                                        value={localSettings.nvidiaModel}
-                                        options={NVIDIA_MODELS}
-                                        onChange={(val) => setLocalSettings({ ...localSettings, nvidiaModel: val })}
-                                    />
-                                </div>
-                            </div>
-                        )}
 
-                        {/* Cloudflare Settings */}
-                        {activeTab === 'cloudflare' && (
-                            <div className="provider-settings">
-                                <div className="form-group">
-                                    <label>Account ID</label>
-                                    <input
-                                        type="text"
-                                        value={localSettings.cloudflareAccountId || ''}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, cloudflareAccountId: e.target.value })
-                                        }
-                                        placeholder="Enter your Cloudflare Account ID"
-                                    />
-                                </div>
 
-                                <div className="form-group">
-                                    <label>API Token</label>
-                                    <input
-                                        type="password"
-                                        value={localSettings.cloudflareApiToken || ''}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, cloudflareApiToken: e.target.value })
-                                        }
-                                        placeholder="Enter your Cloudflare API Token"
-                                    />
-                                    <span className="hint">Must have Workers AI read permission</span>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Model</label>
-                                    <CustomDropdown
-                                        value={localSettings.cloudflareModel}
-                                        options={CLOUDFLARE_MODELS}
-                                        onChange={(val) => setLocalSettings({ ...localSettings, cloudflareModel: val })}
-                                    />
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     <div className="modal-actions">
