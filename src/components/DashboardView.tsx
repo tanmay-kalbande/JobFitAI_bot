@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResumeVersion } from '../types';
+import type { ResumeVersion } from '../types';
 
 interface DashboardViewProps {
   groupedVersions: Record<string, ResumeVersion[]>;
