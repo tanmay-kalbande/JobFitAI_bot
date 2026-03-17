@@ -850,6 +850,8 @@ function App() {
           settings={settings}
           onSave={handleSaveSettings}
           onClose={() => setShowSettings(false)}
+          onExport={handleExportBackup}
+          onImport={handleImportBackup}
         />
       )}
 

@@ -4,15 +4,11 @@ import type { ResumeVersion } from '../types';
 interface DashboardViewProps {
   groupedVersions: Record<string, ResumeVersion[]>;
   onSelectVersion: (version: ResumeVersion) => void;
-  onExport: () => void;
-  onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const DashboardView = ({
   groupedVersions,
   onSelectVersion,
-  onExport,
-  onImport,
 }: DashboardViewProps) => {
   return (
     <div className="dashboard-wrapper">
@@ -22,15 +18,6 @@ export const DashboardView = ({
           <span className="subtitle">
             {Object.keys(groupedVersions).length} Companies tracked
           </span>
-        </div>
-        <div className="action-area">
-          <button className="dashboard-action-btn" onClick={onExport}>
-            Export Backup
-          </button>
-          <label className="dashboard-action-btn import-btn">
-            Import Backup
-            <input type="file" accept=".json" onChange={onImport} style={{ display: 'none' }} />
-          </label>
         </div>
       </div>
 

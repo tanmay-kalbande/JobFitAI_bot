@@ -7,9 +7,11 @@ interface SettingsModalProps {
     settings: AISettings;
     onSave: (settings: AISettings) => void;
     onClose: () => void;
+    onExport?: () => void;
+    onImport?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps) {
+export function SettingsModal({ settings, onSave, onClose, onExport, onImport }: SettingsModalProps) {
     const [localSettings, setLocalSettings] = useState<AISettings>(settings);
     const [activeTab, setActiveTab] = useState<AIProvider>(settings.provider);
 
@@ -210,13 +212,30 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
 
                     </div>
 
-                    <div className="modal-actions">
-                        <button type="button" className="btn-secondary" onClick={onClose}>
-                            Cancel
-                        </button>
-                        <button type="submit" className="btn-primary">
-                            Save Settings
-                        </button>
+                    <div className="modal-actions" style={{ justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                        
+                        <div className="backup-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                            {onExport && (
+                                <button type="button" className="btn-secondary" onClick={onExport} style={{ fontSize: '0.75rem', padding: '0.4rem 0.75rem' }}>
+                                    Export Backup
+                                </button>
+                            )}
+                            {onImport && (
+                                <label className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.75rem', cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center' }}>
+                                    Import Backup
+                                    <input type="file" accept=".json" onChange={onImport} style={{ display: 'none' }} />
+                                </label>
+                            )}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button type="button" className="btn-secondary" onClick={onClose}>
+                                Cancel
+                            </button>
+                            <button type="submit" className="btn-primary">
+                                Save Settings
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
