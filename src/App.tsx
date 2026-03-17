@@ -756,7 +756,7 @@ function App() {
       <footer className="app-footer no-print">
         <div className="footer-ticker">
           <span>
-            🔥 AI Models Updated: Gemini 3 Flash is Live • Cerebras Inference hitting 1800+ t/s • Mistral Large-2 optimized for tailoring • Groq support for Llama 3.3 70B enabled!
+            🔥 Latest: Cerebras Llama 3.1 8B added • Cerebras Qwen 3 235B added • GPT-OSS 120B optimizations live • Layout fix completed for all model selection tabs side-by-side!
           </span>
         </div>
         <p>Built with ❤️ by <span>Tanmay Kalbande</span></p>
