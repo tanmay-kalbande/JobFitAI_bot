@@ -136,6 +136,17 @@ async function callGroqAI(prompt: string, settings: AISettings): Promise<string>
 
 
 
+function getFinalPrompt(prompt: string, settings: AISettings): string {
+    const isGptOss = 
+        (settings.provider === 'cerebras' && settings.cerebrasModel === 'gpt-oss-120b') ||
+        (settings.provider === 'groq' && settings.groqModel && settings.groqModel.toLowerCase().includes('gpt-oss'));
+
+    if (!isGptOss) {
+        return prompt + `\n\n[STRICT REMINDER]: You MUST include EVERY single section, item, or detail from the input resume (e.g., Education, Projects, Custom Sections, Certifications) in the output. Do NOT skip, omit, or structure away any original data. Optimization means improving the phrasing/layout, not deleting information.`;
+    }
+    return prompt;
+}
+
 export async function callAI(prompt: string, settings: AISettings): Promise<string> {
     // Cancel any existing request
     cancelCurrentRequest();
@@ -272,7 +283,7 @@ ${resumeData}
 
 Return ONLY the JSON object, nothing else.`;
 
-    const response = await callAI(prompt, settings);
+    const response = await callAI(getFinalPrompt(prompt, settings), settings);
     const jsonStr = extractJSON(response);
 
     try {
@@ -371,7 +382,7 @@ ${jobDescription}
 
 Return ONLY the JSON object, nothing else.`;
 
-    const response = await callAI(prompt, settings);
+    const response = await callAI(getFinalPrompt(prompt, settings), settings);
     const jsonStr = extractJSON(response);
 
     try {
@@ -536,7 +547,7 @@ CRITICAL:
 
 Return ONLY the JSON object.`;
 
-    const response = await callAI(prompt, settings);
+    const response = await callAI(getFinalPrompt(prompt, settings), settings);
     const jsonStr = extractJSON(response);
 
     try {
