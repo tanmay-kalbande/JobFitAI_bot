@@ -528,8 +528,6 @@ function App() {
           <DashboardView 
             groupedVersions={groupedVersions} 
             onSelectVersion={(v) => { handleSelectVersion(v); setActiveView('editor'); }}
-            onExport={handleExportBackup}
-            onImport={handleImportBackup}
           />
         ) : (
           <>
