@@ -4216,3 +4216,50 @@ body {
   flex: 1;
   text-align: center;
 }
+
+/* ── Section quick-pick bar ── */
+.agf-section-bar {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+
+.agf-section-bar::-webkit-scrollbar { display: none; }
+
+.agf-sec-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.22rem 0.55rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 99px;
+  font-family: inherit;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.agf-sec-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(99,102,241,0.05);
+}
+
+.agf-sec-btn.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(99,102,241,0.08);
+  font-weight: 700;
+}
+
+.agf-sec-btn:disabled { opacity: 0.45; cursor: not-allowed; }
