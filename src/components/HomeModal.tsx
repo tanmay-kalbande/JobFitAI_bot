@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { ResumeVersion } from '../types';
 import { formatTimestamp } from '../types';
 
