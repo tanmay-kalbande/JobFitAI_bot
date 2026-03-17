@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import type { ResumeVersion } from '../types';
 import { formatTimestamp } from '../types';
 
@@ -5,115 +6,181 @@ interface HomeModalProps {
     versions: ResumeVersion[];
     onClose: () => void;
     onSelectVersion: (version: ResumeVersion) => void;
+    onDeleteVersion?: (id: string) => void;
 }
 
-export function HomeModal({ versions, onClose, onSelectVersion }: HomeModalProps) {
-    // Group versions by company
-    const groupedVersions = versions.reduce((acc, curr) => {
-        const company = curr.companyName?.trim() || 'General Resumes';
-        if (!acc[company]) {
-            acc[company] = [];
-        }
-        acc[company].push(curr);
-        return acc;
-    }, {} as Record<string, ResumeVersion[]>);
+export function HomeModal({ versions, onClose, onSelectVersion, onDeleteVersion }: HomeModalProps) {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
 
-    const companies = Object.keys(groupedVersions).sort();
+    // Group versions by company
+    const groupedVersions = useMemo(() => {
+        return versions.reduce((acc, curr) => {
+            const company = curr.companyName?.trim() || 'General';
+            if (!acc[company]) acc[company] = [];
+            acc[company].push(curr);
+            return acc;
+        }, {} as Record<string, ResumeVersion[]>);
+    }, [versions]);
+
+    const companies = useMemo(() => Object.keys(groupedVersions).sort(), [groupedVersions]);
+
+    const activeCompany = selectedCompany && groupedVersions[selectedCompany]
+        ? selectedCompany
+        : companies[0] ?? null;
+
+    const filteredVersions = useMemo(() => {
+        if (!activeCompany) return [];
+        const list = groupedVersions[activeCompany] ?? [];
+        if (!searchQuery.trim()) return list;
+        const q = searchQuery.toLowerCase();
+        return list.filter(v =>
+            v.name.toLowerCase().includes(q) ||
+            (v.jobTitle ?? '').toLowerCase().includes(q) ||
+            (v.model ?? '').toLowerCase().includes(q)
+        );
+    }, [activeCompany, groupedVersions, searchQuery]);
+
+    const typeLabel = (type: ResumeVersion['type']) => {
+        if (type === 'tailored') return { icon: '✦', color: '#22c55e', label: 'Tailored' };
+        if (type === 'fixed') return { icon: '⬡', color: '#f59e0b', label: 'Fixed' };
+        return { icon: '○', color: '#9ca3b8', label: 'Base' };
+    };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content home-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%' }}>
-                <div className="modal-header">
-                    <div>
-                        <h2>Resume History Dashboard</h2>
-                        <p style={{ fontSize: '0.85rem', color: '#828a9e', marginTop: '0.25rem' }}>
-                            View and manage all resumes you've generated, grouped by company.
+            <div
+                className="modal-content home-modal"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="modal-header hm-header">
+                    <div className="hm-header-left">
+                        <h2>Resume History</h2>
+                        <p className="hm-subtitle">
+                            {versions.length} resume{versions.length !== 1 ? 's' : ''} &middot; {companies.length} compan{companies.length !== 1 ? 'ies' : 'y'}
                         </p>
                     </div>
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
 
-                <div className="modal-scroll-area" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', background: '#f8f9fc', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
-                    {companies.length === 0 ? (
-                        <div className="empty-state" style={{ textAlign: 'center', padding: '3rem', color: '#828a9e' }}>
-                            <p>No resume history found. Start tailoring resumes to see them here!</p>
+                {versions.length === 0 ? (
+                    <div className="hm-empty">
+                        <div className="hm-empty-icon">◈</div>
+                        <p>No resumes yet</p>
+                        <span>Generate or tailor a resume to see it here</span>
+                    </div>
+                ) : (
+                    <>
+                        {/* Search bar */}
+                        <div className="hm-search-bar">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input
+                                className="hm-search-input"
+                                type="text"
+                                placeholder="Search by title or model…"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                            />
+                            {searchQuery && (
+                                <button className="hm-search-clear" onClick={() => setSearchQuery('')}>×</button>
+                            )}
                         </div>
-                    ) : (
-                        <div className="company-grid" style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                            gap: '1.5rem'
-                        }}>
-                            {companies.map(company => (
-                                <div key={company} className="company-card" style={{
-                                    background: '#ffffff',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                                    overflow: 'hidden',
-                                    border: '1px solid #e1e4ed'
-                                }}>
-                                    <div className="company-card-header" style={{
-                                        borderBottom: '1px solid #e1e4ed',
-                                        padding: '1rem',
-                                        background: company === 'General Resumes' ? 'linear-gradient(135deg, #f0f2fb, #e4e7f5)' : 'linear-gradient(135deg, #2d2d3f, #1a1a2e)',
-                                        color: company === 'General Resumes' ? '#4a5568' : '#ffffff'
-                                    }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            {company}
-                                            <span style={{
-                                                fontSize: '0.75rem', 
-                                                background: company === 'General Resumes' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)',
-                                                padding: '2px 8px', 
-                                                borderRadius: '12px' 
-                                            }}>
-                                                {groupedVersions[company].length} Resumes
-                                            </span>
-                                        </h3>
+
+                        {/* Two-panel body */}
+                        <div className="hm-body">
+                            {/* Sidebar: company tabs */}
+                            <div className="hm-sidebar">
+                                <div className="hm-sidebar-label">Companies</div>
+                                {companies.map(company => (
+                                    <button
+                                        key={company}
+                                        className={`hm-company-tab ${activeCompany === company ? 'active' : ''}`}
+                                        onClick={() => { setSelectedCompany(company); setSearchQuery(''); }}
+                                    >
+                                        <span className="hm-ct-name" title={company}>{company}</span>
+                                        <span className={`hm-ct-badge ${activeCompany === company ? 'active' : ''}`}>
+                                            {groupedVersions[company].length}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Main: resume list */}
+                            <div className="hm-list-panel">
+                                {activeCompany && (
+                                    <div className="hm-list-header">
+                                        <span className="hm-list-company">{activeCompany}</span>
+                                        <span className="hm-list-count">
+                                            {filteredVersions.length} / {groupedVersions[activeCompany]?.length ?? 0}
+                                        </span>
                                     </div>
-                                    <div className="company-card-body" style={{ padding: '0.5rem 0' }}>
-                                        {groupedVersions[company].map(version => (
-                                            <div 
-                                                key={version.id} 
-                                                className="version-row"
-                                                onClick={() => {
-                                                    onSelectVersion(version);
-                                                    onClose();
-                                                }}
-                                                style={{
-                                                    padding: '0.75rem 1rem',
-                                                    borderBottom: '1px solid #f1f3f7',
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    gap: '0.25rem'
-                                                }}
-                                            >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <strong style={{ fontSize: '0.9rem', color: '#1a202c' }}>{version.name}</strong>
-                                                    <span style={{ fontSize: '0.75rem', color: '#718096' }}>{formatTimestamp(version.timestamp)}</span>
-                                                </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#4a5568' }}>
-                                                    <span>{version.jobTitle || 'General Application'}</span>
-                                                    {version.model && (
-                                                        <span style={{ 
-                                                            fontSize: '0.65rem',
-                                                            background: '#e2e8f0',
-                                                            padding: '2px 6px',
-                                                            borderRadius: '4px',
-                                                            color: '#4a5568'
-                                                        }}>
-                                                            {version.model}
-                                                        </span>
+                                )}
+                                <div className="hm-list">
+                                    {filteredVersions.length === 0 ? (
+                                        <div className="hm-list-empty">
+                                            {searchQuery ? 'No results found' : 'No resumes here'}
+                                        </div>
+                                    ) : (
+                                        filteredVersions.map(version => {
+                                            const t = typeLabel(version.type);
+                                            return (
+                                                <div
+                                                    key={version.id}
+                                                    className="hm-resume-row"
+                                                    onClick={() => { onSelectVersion(version); onClose(); }}
+                                                >
+                                                    <span className="hm-rr-icon" style={{ color: t.color }}>{t.icon}</span>
+                                                    <div className="hm-rr-body">
+                                                        <div className="hm-rr-top">
+                                                            <strong className="hm-rr-title">
+                                                                {version.jobTitle || 'General Application'}
+                                                            </strong>
+                                                            <span className="hm-rr-time">{formatTimestamp(version.timestamp)}</span>
+                                                        </div>
+                                                        <div className="hm-rr-meta">
+                                                            <span
+                                                                className="hm-rr-type-badge"
+                                                                style={{ background: `${t.color}18`, color: t.color }}
+                                                            >
+                                                                {t.label}
+                                                            </span>
+                                                            {version.model && (
+                                                                <span className="hm-rr-model">{version.model}</span>
+                                                            )}
+                                                            {version.alignmentScore != null && version.alignmentScore > 0 && (
+                                                                <span
+                                                                    className="hm-rr-score"
+                                                                    style={{
+                                                                        color: version.alignmentScore >= 70 ? '#22c55e' : version.alignmentScore >= 50 ? '#f59e0b' : '#ef4444'
+                                                                    }}
+                                                                >
+                                                                    {version.alignmentScore}% match
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {onDeleteVersion && (
+                                                        <button
+                                                            className="hm-rr-delete"
+                                                            title="Delete"
+                                                            onClick={e => { e.stopPropagation(); onDeleteVersion(version.id); }}
+                                                        >
+                                                            ×
+                                                        </button>
                                                     )}
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            );
+                                        })
+                                    )}
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    )}
-                </div>
+                    </>
+                )}
             </div>
         </div>
     );
