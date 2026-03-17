@@ -11,228 +11,189 @@ interface SettingsModalProps {
     onImportData?: () => void;
 }
 
+const PROVIDERS: { id: AIProvider; label: string; icon: string }[] = [
+    { id: 'google',   label: 'Google',   icon: '/gemini.svg'   },
+    { id: 'cerebras', label: 'Cerebras', icon: '/cerebras.svg' },
+    { id: 'mistral',  label: 'Mistral',  icon: '/mistral.svg'  },
+    { id: 'groq',     label: 'Groq',     icon: '/groq.svg'     },
+];
+
+const PROVIDER_CONFIG: Record<AIProvider, {
+    keyField: keyof AISettings;
+    modelField: keyof AISettings;
+    models: { value: string; label: string }[];
+    placeholder: string;
+    hint: string;
+}> = {
+    google:   { keyField: 'googleApiKey',   modelField: 'googleModel',   models: GOOGLE_MODELS,   placeholder: 'Google AI Studio API key',  hint: 'Get from: ai.google.dev' },
+    cerebras: { keyField: 'cerebrasApiKey', modelField: 'cerebrasModel', models: CEREBRAS_MODELS, placeholder: 'Cerebras API key',          hint: 'Get from: cloud.cerebras.ai' },
+    mistral:  { keyField: 'mistralApiKey',  modelField: 'mistralModel',  models: MISTRAL_MODELS,  placeholder: 'Mistral API key',           hint: 'Get from: console.mistral.ai' },
+    groq:     { keyField: 'groqApiKey',     modelField: 'groqModel',     models: GROQ_MODELS,     placeholder: 'Groq API key',              hint: 'Get from: console.groq.com' },
+};
+
 export function SettingsModal({ settings, onSave, onClose, onExportData, onImportData }: SettingsModalProps) {
-    const [localSettings, setLocalSettings] = useState<AISettings>(settings);
+    const [local, setLocal] = useState<AISettings>({ ...settings });
     const [activeTab, setActiveTab] = useState<AIProvider>(settings.provider);
+    const [showKey, setShowKey] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave(localSettings);
+        onSave(local);
         onClose();
     };
 
+    const cfg = PROVIDER_CONFIG[activeTab];
+    const currentKey = String(local[cfg.keyField] ?? '');
+    const currentModel = String(local[cfg.modelField] ?? '');
+
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content settings-modal" onClick={e => e.stopPropagation()}>
+                {/* Header */}
                 <div className="modal-header">
                     <div>
-                        <h2>AI Settings</h2>
-                        <p style={{ fontSize: '0.75rem', color: '#5a5f7a', marginTop: '0.25rem' }}>
-                            Configure your preferred AI providers and models
-                        </p>
+                        <h2>Settings</h2>
+                        <p className="settings-subtitle">AI provider · models · preferences</p>
                     </div>
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="modal-scroll-area" style={{ flex: 1, overflowY: 'auto', padding: '0 1.25rem' }}>
-                        {/* User Name (for PDF naming) */}
-                        <div className="form-group user-name-group" style={{ marginTop: '1rem' }}>
-                            <input
-                                type="text"
-                                value={localSettings.userName}
-                                onChange={(e) =>
-                                    setLocalSettings({ ...localSettings, userName: e.target.value })
-                                }
-                                placeholder="Enter your full name"
-                                style={{ fontSize: '1rem', fontWeight: 600 }}
-                            />
-                            <span className="hint">Used for naming exported PDF files</span>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                    {/* Scrollable body */}
+                    <div className="settings-scroll">
+
+                        {/* User name */}
+                        <div className="settings-section">
+                            <div className="settings-section-label">Profile</div>
+                            <div className="sm-field">
+                                <label className="sm-label">Your Name</label>
+                                <input
+                                    type="text"
+                                    className="sm-input"
+                                    value={local.userName}
+                                    onChange={e => setLocal({ ...local, userName: e.target.value })}
+                                    placeholder="Full name (used in PDF filenames)"
+                                />
+                            </div>
                         </div>
 
-                        {/* Provider Tabs */}
-                        <div className="provider-tabs">
-                            <button
-                                type="button"
-                                className={`tab ${activeTab === 'google' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('google');
-                                    setLocalSettings({ ...localSettings, provider: 'google' });
-                                }}
-                            >
-                                <img src="/gemini.svg" alt="Google" className="tab-icon-img" />
-                                Google
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab ${activeTab === 'cerebras' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('cerebras');
-                                    setLocalSettings({ ...localSettings, provider: 'cerebras' });
-                                }}
-                            >
-                                <img src="/cerebras.svg" alt="Cerebras" className="tab-icon-img" />
-                                Cerebras
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab ${activeTab === 'mistral' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('mistral');
-                                    setLocalSettings({ ...localSettings, provider: 'mistral' });
-                                }}
-                            >
-                                <img src="/mistral.svg" alt="Mistral" className="tab-icon-img" />
-                                Mistral
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab ${activeTab === 'groq' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('groq');
-                                    setLocalSettings({ ...localSettings, provider: 'groq' });
-                                }}
-                            >
-                                <img src="/groq.svg" alt="Groq" className="tab-icon-img" />
-                                Groq
-                            </button>
+                        {/* Provider */}
+                        <div className="settings-section">
+                            <div className="settings-section-label">AI Provider</div>
 
+                            {/* Tab strip */}
+                            <div className="sm-provider-tabs">
+                                {PROVIDERS.map(p => (
+                                    <button
+                                        key={p.id}
+                                        type="button"
+                                        className={`sm-provider-tab ${activeTab === p.id ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setActiveTab(p.id);
+                                            setLocal(prev => ({ ...prev, provider: p.id }));
+                                            setShowKey(false);
+                                        }}
+                                    >
+                                        <img src={p.icon} alt={p.label} className="sm-tab-icon" />
+                                        <span>{p.label}</span>
+                                        {local.provider === p.id && (
+                                            <span className="sm-active-dot" />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* API Key */}
+                            <div className="sm-field" style={{ marginTop: '1rem' }}>
+                                <label className="sm-label">API Key</label>
+                                <div className="sm-input-row">
+                                    <input
+                                        type={showKey ? 'text' : 'password'}
+                                        className="sm-input sm-input-key"
+                                        value={currentKey}
+                                        onChange={e => setLocal({ ...local, [cfg.keyField]: e.target.value })}
+                                        placeholder={cfg.placeholder}
+                                        autoComplete="off"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="sm-eye-btn"
+                                        onClick={() => setShowKey(v => !v)}
+                                        title={showKey ? 'Hide key' : 'Show key'}
+                                    >
+                                        {showKey ? (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                        ) : (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                                <span className="sm-hint">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                        <polyline points="15 3 21 3 21 9" />
+                                        <line x1="10" y1="14" x2="21" y2="3" />
+                                    </svg>
+                                    {cfg.hint}
+                                </span>
+                            </div>
+
+                            {/* Model */}
+                            <div className="sm-field">
+                                <label className="sm-label">Model</label>
+                                <CustomDropdown
+                                    value={currentModel}
+                                    options={cfg.models}
+                                    onChange={val => setLocal({ ...local, [cfg.modelField]: val })}
+                                    placeholder="Select model"
+                                />
+                            </div>
                         </div>
 
-                        {/* Google Settings */}
-                        {activeTab === 'google' && (
-                            <div className="provider-settings">
-                                <div className="form-group">
-                                    <label>API Key</label>
-                                    <input
-                                        type="password"
-                                        value={localSettings.googleApiKey}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, googleApiKey: e.target.value })
-                                        }
-                                        placeholder="Enter your Google AI Studio API key"
-                                    />
-                                    <span className="hint">Get from: ai.google.dev</span>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Model</label>
-                                    <CustomDropdown
-                                        value={localSettings.googleModel}
-                                        options={GOOGLE_MODELS}
-                                        onChange={(val) => setLocalSettings({ ...localSettings, googleModel: val })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Cerebras Settings */}
-                        {activeTab === 'cerebras' && (
-                            <div className="provider-settings">
-                                <div className="form-group">
-                                    <label>API Key</label>
-                                    <input
-                                        type="password"
-                                        value={localSettings.cerebrasApiKey}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, cerebrasApiKey: e.target.value })
-                                        }
-                                        placeholder="Enter your Cerebras API key"
-                                    />
-                                    <span className="hint">Get from: cloud.cerebras.ai</span>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Model</label>
-                                    <CustomDropdown
-                                        value={localSettings.cerebrasModel}
-                                        options={CEREBRAS_MODELS}
-                                        onChange={(val) => setLocalSettings({ ...localSettings, cerebrasModel: val })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Mistral Settings */}
-                        {activeTab === 'mistral' && (
-                            <div className="provider-settings">
-                                <div className="form-group">
-                                    <label>API Key</label>
-                                    <input
-                                        type="password"
-                                        value={localSettings.mistralApiKey}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, mistralApiKey: e.target.value })
-                                        }
-                                        placeholder="Enter your Mistral API key"
-                                    />
-                                    <span className="hint">Get from: console.mistral.ai</span>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Model</label>
-                                    <CustomDropdown
-                                        value={localSettings.mistralModel}
-                                        options={MISTRAL_MODELS}
-                                        onChange={(val) => setLocalSettings({ ...localSettings, mistralModel: val })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Groq Settings */}
-                        {activeTab === 'groq' && (
-                            <div className="provider-settings">
-                                <div className="form-group">
-                                    <label>API Key</label>
-                                    <input
-                                        type="password"
-                                        value={localSettings.groqApiKey}
-                                        onChange={(e) =>
-                                            setLocalSettings({ ...localSettings, groqApiKey: e.target.value })
-                                        }
-                                        placeholder="Enter your Groq API key"
-                                    />
-                                    <span className="hint">Get from: console.groq.com</span>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Model</label>
-                                    <CustomDropdown
-                                        value={localSettings.groqModel}
-                                        options={GROQ_MODELS}
-                                        onChange={(val) => setLocalSettings({ ...localSettings, groqModel: val })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Data Management Section */}
-                        <div className="form-group" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-                            <label>Data Backup & Restore</label>
-                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                        {/* Data Management */}
+                        <div className="settings-section">
+                            <div className="settings-section-label">Data</div>
+                            <div className="sm-data-row">
                                 {onExportData && (
-                                    <button type="button" className="btn-secondary" onClick={onExportData} style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem' }}>
-                                        Export Base Resume & Keys
+                                    <button type="button" className="sm-data-btn" onClick={onExportData}>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
+                                        </svg>
+                                        Export backup
                                     </button>
                                 )}
                                 {onImportData && (
-                                    <button type="button" className="btn-secondary" onClick={onImportData} style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem' }}>
-                                        Import Data
+                                    <button type="button" className="sm-data-btn" onClick={onImportData}>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="17 8 12 3 7 8" />
+                                            <line x1="12" y1="3" x2="12" y2="15" />
+                                        </svg>
+                                        Import backup
                                     </button>
                                 )}
                             </div>
-                            <p style={{ fontSize: '0.65rem', color: '#828a9e', marginTop: '0.5rem', lineHeight: '1.4' }}>
-                                Export your base resume data and API settings to a JSON file to easily backup or restore them.
+                            <p className="sm-data-hint">
+                                Exports your base resume data and API keys to a JSON file.
                             </p>
                         </div>
                     </div>
 
-                    <div className="modal-actions">
+                    {/* Footer actions */}
+                    <div className="modal-actions settings-actions">
                         <button type="button" className="btn-secondary" onClick={onClose}>
                             Cancel
                         </button>
-                        <button type="submit" className="btn-primary">
+                        <button type="submit" className="btn-primary" style={{ flex: 2 }}>
                             Save Settings
                         </button>
                     </div>
