@@ -981,19 +981,19 @@ body {
 .modal-actions {
   display: flex;
   gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
+  padding: 1.25rem;
   border-top: 1px solid var(--border-color);
 }
 
 .modal-actions button {
   flex: 1;
-  padding: 0.6rem;
 }
 
 .modal-actions .btn-secondary {
   background: transparent;
   border: 1px solid var(--border-light);
   color: var(--text-primary);
+  padding: 0.75rem;
   font-family: inherit;
   font-size: 0.7rem;
   font-weight: 600;
@@ -1584,12 +1584,11 @@ body {
   }
 
   .modal-actions {
-    padding: 0.6rem 0.75rem;
+    padding: 1rem;
   }
 
   .modal-actions button {
-    min-height: auto;
-    padding: 0.5rem;
+    min-height: 44px;
   }
 
   /* ---- ANALYSIS MODAL ---- */
@@ -3074,15 +3073,22 @@ body {
 
 /* App Footer Styling */
 .app-footer {
-  padding: 1.5rem 2rem;
+  padding: 0.75rem 0;
   text-align: center;
-  background: #fcfcfd;
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  background: transparent;
+  border: none;
 }
 
 .app-footer p {
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 1rem;
+  background: white;
+  border-radius: 100px;
+  font-size: 0.75rem;
   color: #5a5f7a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   margin: 0;
   font-weight: 500;
 }
