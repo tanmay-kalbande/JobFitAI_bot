@@ -67,7 +67,7 @@ export interface CustomSection {
   items: string[];
 }
 
-export type AIProvider = 'google' | 'cerebras' | 'mistral' | 'groq';
+export type AIProvider = 'google' | 'cerebras' | 'mistral' | 'groq' | 'nvidia' | 'cloudflare';
 
 export type ResumeFormat = 'classic' | 'modern';
 
@@ -96,10 +96,15 @@ export interface AISettings {
   cerebrasApiKey: string;
   mistralApiKey: string;
   groqApiKey: string;
+  nvidiaApiKey: string;
+  cloudflareAccountId: string;
+  cloudflareApiToken: string;
   googleModel: string;
   cerebrasModel: string;
   mistralModel: string;
   groqModel: string;
+  nvidiaModel: string;
+  cloudflareModel: string;
 }
 
 export const DEFAULT_SETTINGS: AISettings = {
@@ -109,10 +114,15 @@ export const DEFAULT_SETTINGS: AISettings = {
   cerebrasApiKey: '',
   mistralApiKey: '',
   groqApiKey: '',
+  nvidiaApiKey: '',
+  cloudflareAccountId: '',
+  cloudflareApiToken: '',
   googleModel: 'gemini-3-flash-preview',
   cerebrasModel: 'gpt-oss-120b',
   mistralModel: 'mistral-small-latest',
-  groqModel: 'llama-3.3-70b-versatile'
+  groqModel: 'llama-3.3-70b-versatile',
+  nvidiaModel: 'nemotron-3-super-120b-a12b',
+  cloudflareModel: '@cf/openai/gpt-oss-120b'
 };
 
 // Model options for each provider
@@ -136,11 +146,19 @@ export const MISTRAL_MODELS = [
 ];
 
 export const GROQ_MODELS = [
+  { value: 'groq/compound', label: 'Groq Compound' },
   { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile' },
-  { value: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant' },
-  { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
-  { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },
-  { value: 'deepseek-r1-distill-llama-70b', label: 'DeepSeek R1 Distill 70B' },
+  { value: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
+  { value: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B' },
+  { value: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
+];
+
+export const NVIDIA_MODELS = [
+  { value: 'nemotron-3-super-120b-a12b', label: 'Nemotron-3 Super 120B' },
+];
+
+export const CLOUDFLARE_MODELS = [
+  { value: '@cf/openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
 ];
 
 // Edit log for tracking manual changes
