@@ -80,8 +80,8 @@ export interface ResumeVersion {
   type: 'base' | 'tailored' | 'fixed';
   companyName?: string;
   jobTitle?: string;
-  modelUsed?: string;
   atsKeywords?: string[];
+  model?: string; // AI model used to generate or tailor
   changes?: string[]; // AI-generated list of changes made
   alignmentScore?: number; // 0-100 job match percentage
   alignmentDetails?: {

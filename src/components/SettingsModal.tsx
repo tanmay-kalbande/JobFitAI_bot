@@ -7,11 +7,11 @@ interface SettingsModalProps {
     settings: AISettings;
     onSave: (settings: AISettings) => void;
     onClose: () => void;
-    onExport?: () => void;
-    onImport?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onExportData?: () => void;
+    onImportData?: () => void;
 }
 
-export function SettingsModal({ settings, onSave, onClose, onExport, onImport }: SettingsModalProps) {
+export function SettingsModal({ settings, onSave, onClose, onExportData, onImportData }: SettingsModalProps) {
     const [localSettings, setLocalSettings] = useState<AISettings>(settings);
     const [activeTab, setActiveTab] = useState<AIProvider>(settings.provider);
 
@@ -207,35 +207,34 @@ export function SettingsModal({ settings, onSave, onClose, onExport, onImport }:
                             </div>
                         )}
 
-
-
-
+                        {/* Data Management Section */}
+                        <div className="form-group" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                            <label>Data Backup & Restore</label>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                {onExportData && (
+                                    <button type="button" className="btn-secondary" onClick={onExportData} style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem' }}>
+                                        Export Base Resume & Keys
+                                    </button>
+                                )}
+                                {onImportData && (
+                                    <button type="button" className="btn-secondary" onClick={onImportData} style={{ flex: 1, padding: '0.4rem', fontSize: '0.75rem' }}>
+                                        Import Data
+                                    </button>
+                                )}
+                            </div>
+                            <p style={{ fontSize: '0.65rem', color: '#828a9e', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                                Export your base resume data and API settings to a JSON file to easily backup or restore them.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="modal-actions" style={{ justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-                        
-                        <div className="backup-actions" style={{ display: 'flex', gap: '0.5rem' }}>
-                            {onExport && (
-                                <button type="button" className="btn-secondary" onClick={onExport} style={{ fontSize: '0.75rem', padding: '0.4rem 0.75rem' }}>
-                                    Export Backup
-                                </button>
-                            )}
-                            {onImport && (
-                                <label className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.4rem 0.75rem', cursor: 'pointer', margin: 0, display: 'inline-flex', alignItems: 'center' }}>
-                                    Import Backup
-                                    <input type="file" accept=".json" onChange={onImport} style={{ display: 'none' }} />
-                                </label>
-                            )}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button type="button" className="btn-secondary" onClick={onClose}>
-                                Cancel
-                            </button>
-                            <button type="submit" className="btn-primary">
-                                Save Settings
-                            </button>
-                        </div>
+                    <div className="modal-actions">
+                        <button type="button" className="btn-secondary" onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn-primary">
+                            Save Settings
+                        </button>
                     </div>
                 </form>
             </div>
