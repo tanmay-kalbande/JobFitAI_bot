@@ -1,0 +1,193 @@
+/* ========================================
+   SKELETON RESUME STYLES
+   ======================================== */
+
+.skeleton-resume {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Base skeleton line */
+.skeleton-line {
+    background: linear-gradient(90deg,
+            #e0e0e0 0%,
+            #f0f0f0 50%,
+            #e0e0e0 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Header skeletons */
+.skeleton-name {
+    height: 32px;
+    width: 280px;
+    margin: 0 auto 12px;
+}
+
+.skeleton-title {
+    height: 18px;
+    width: 180px;
+    margin: 0 auto 16px;
+}
+
+.skeleton-contact {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.skeleton-contact-item {
+    height: 14px;
+    width: 100px;
+}
+
+/* Section skeletons */
+.skeleton-section-title {
+    height: 20px;
+    width: 200px;
+    margin-bottom: 16px;
+}
+
+/* Text skeletons */
+.skeleton-text-long {
+    height: 14px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.skeleton-text-medium {
+    height: 14px;
+    width: 75%;
+    margin-bottom: 8px;
+}
+
+/* Experience skeletons */
+.skeleton-experience {
+    margin-bottom: 20px;
+}
+
+.skeleton-exp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.skeleton-job-title {
+    height: 16px;
+    width: 180px;
+}
+
+.skeleton-duration {
+    height: 14px;
+    width: 120px;
+}
+
+.skeleton-company {
+    height: 14px;
+    width: 150px;
+    margin-bottom: 10px;
+}
+
+.skeleton-duties {
+    padding-left: 20px;
+}
+
+.skeleton-duty {
+    height: 12px;
+    width: 90%;
+    margin-bottom: 6px;
+}
+
+.skeleton-duty-short {
+    height: 12px;
+    width: 70%;
+    margin-bottom: 6px;
+}
+
+/* Education skeletons */
+.skeleton-education {
+    margin-bottom: 12px;
+}
+
+.skeleton-degree {
+    height: 16px;
+    width: 250px;
+    margin-bottom: 6px;
+}
+
+.skeleton-institution {
+    height: 14px;
+    width: 200px;
+}
+
+/* Skills skeletons */
+.skeleton-skills {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeleton-skill-row {
+    height: 14px;
+    width: 100%;
+}
+
+.skeleton-skill-row-short {
+    height: 14px;
+    width: 60%;
+}
+
+/* Staggered animation for sections - makes it feel more dynamic */
+.skeleton-resume .section:nth-child(1) .skeleton-line {
+    animation-delay: 0s;
+}
+
+.skeleton-resume .section:nth-child(2) .skeleton-line {
+    animation-delay: 0.1s;
+}
+
+.skeleton-resume .section:nth-child(3) .skeleton-line {
+    animation-delay: 0.2s;
+}
+
+.skeleton-resume .section:nth-child(4) .skeleton-line {
+    animation-delay: 0.3s;
+}
+
+.skeleton-resume .section:nth-child(5) .skeleton-line {
+    animation-delay: 0.4s;
+}
+
+/* Progress indicator at top */
+.skeleton-resume::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    animation: progressSweep 2s ease-in-out infinite;
+}
+
+@keyframes progressSweep {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}

@@ -1,0 +1,36 @@
+/* Reset default styles */
+:root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: inherit;
+  text-decoration: inherit;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100vh;
+  background: #f0f2f5;
+  /* Telegram Mini App safe area */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+#root {
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #f0f2f5;
+}

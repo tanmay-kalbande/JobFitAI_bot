@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tanmay Kalbande — Resume</title>
+
+  <!-- ✅ Correct Google Fonts link -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:   #141414;
+      --ink2:  #3a3a3a;
+      --ink3:  #767676;
+      --ink4:  #b0b0b0;
+
+      /* ✅ Professional accent (muted deep teal) */
+      --accent: #2F5D62;
+
+      --rule:  #e8e8e5;
+      --mono:  'DM Mono', monospace;
+      --sans:  'DM Sans', sans-serif;
+    }
+
+    /* ===== Print fixes ===== */
+    @media print {
+      @page { size: A4; margin: 10mm 12mm; }
+
+      html, body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Print should reflect current zoom set by controls */
+      .page {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      section, .entry, .project, .cert-item, .skills-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .print-actions { display: none !important; }
+
+      a { color: var(--ink2) !important; text-decoration: none !important; }
+    }
+
+    body {
+      font-family: var(--sans);
+      background: #f5f5f3;
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ✅ This element is what we scale (A-/A+) */
+    .page {
+      max-width: 820px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 52px 60px;
+
+      /* default zoom (changed by JS) */
+      zoom: 1;
+    }
+
+    /* HEADER */
+    .head { margin-bottom: 32px; }
+
+    .head-name {
+      font-size: 36px;
+      font-weight: 600;
+      letter-spacing: -0.8px;
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .head-title {
+      font-size: 14px;
+      color: var(--ink2);
+      font-weight: 400;
+      margin-bottom: 18px;
+    }
+
+    .head-contact {
+      display: flex;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink3);
+      gap: 0;
+      line-height: 1.8;
+    }
+
+    .head-contact a { color: var(--ink3); text-decoration: none; }
+    .head-contact a:hover { color: var(--ink); text-decoration: none; }
+    .sep { margin: 0 9px; color: var(--rule); }
+
+    /* SECTION */
+    section { margin-bottom: 30px; }
+
+    .sec-label {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--ink4);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 18px;
+    }
+
+    /* SUMMARY */
+    .summary {
+      font-size: 13.5px;
+      color: var(--ink2);
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    /* ENTRY */
+    .entry { margin-bottom: 22px; }
+    .entry:last-child { margin-bottom: 0; }
+
+    .entry-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 2px;
+    }
+
+    .entry-title { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+
+    .entry-period {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--ink4);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .entry-org { font-size: 13px; color: var(--accent); font-weight: 400; margin-bottom: 3px; }
+
+    .entry-sub {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--ink4);
+      margin-bottom: 10px;
+    }
+
+    .bullets { list-style: none; }
+
+    .bullets li {
+      font-size: 13px;
+      color: var(--ink2);
+      line-height: 1.7;
+      padding-left: 15px;
+      position: relative;
+      margin-bottom: 4px;
+      font-weight: 300;
+    }
+
+    /* ✅ Bullet marker (not em dash) */
+    .bullets li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    .bullets li strong { color: var(--ink); font-weight: 500; }
+
+    /* PROJECTS */
+    .project { margin-bottom: 16px; }
+    .project:last-child { margin-bottom: 0; }
+
+    .proj-top {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 3px;
+    }
+
+    .proj-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+    .proj-stack {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink4);
+    }
+
+    .proj-desc {
+      font-size: 13px;
+      color: var(--ink2);
+      line-height: 1.65;
+      padding-left: 15px;
+      position: relative;
+      font-weight: 300;
+      margin-bottom: 2px;
+    }
+
+    /* ✅ Not an em dash */
+    .proj-desc::before { content: '•'; position: absolute; left: 0; color: var(--accent); }
+
+    /* ✅ Project links: NO underline / NO border */
+    .proj-link {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--ink2);
+      text-decoration: none;
+      padding-left: 15px;
+      display: inline-block;
+      border: none;
+    }
+    .proj-link:hover { color: var(--ink); text-decoration: none; }
+
+    /* ✅ SKILLS TABLE */
+    .skills-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .skills-table td {
+      padding: 6px 0;
+      vertical-align: top;
+    }
+
+    .skills-table tr:not(:last-child) td {
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .skills-table .sk {
+      width: 140px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--ink4);
+      padding-right: 18px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .skills-table .sv {
+      font-size: 13px;
+      color: var(--ink2);
+      font-weight: 300;
+      line-height: 1.65;
+    }
+
+    /* CERTS */
+    .cert-list { display: flex; flex-direction: column; gap: 7px; }
+
+    .cert-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cert-name { font-size: 13px; color: var(--ink2); font-weight: 300; }
+
+    .cert-meta {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--ink4);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Footer actions */
+    .print-actions {
+      margin-top: 26px;
+      padding-top: 16px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-start;
+      font-family: var(--mono);
+      color: var(--ink3);
+    }
+
+    /* ✅ Small buttons, consistent styling */
+    .btn {
+      appearance: none;
+      border: 1px solid var(--rule);
+      background: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink2);
+      line-height: 1;
+    }
+    .btn:hover { border-color: var(--ink4); color: var(--ink); }
+
+    /* Tip stays small */
+    .tip {
+      font-size: 11px;
+      color: var(--ink3);
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 32px 24px; margin: 0; border-radius: 0; box-shadow: none; }
+      .head-name { font-size: 26px; }
+      .skills-table .sk { width: 100px; color: var(--accent); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page" id="resumePage">
+
+    <!-- HEADER -->
+    <header class="head">
+      <div class="head-name">Tanmay Kalbande</div>
+      <div class="head-title">AI Engineer · Data Analyst · Builder of AI-Powered Tools</div>
+
+      <!-- Email & phone are plain text (no hyperlinks). Website/LinkedIn/GitHub are clickable. -->
+      <div class="head-contact">
+        <span>kalbandetanmay@gmail.com</span>
+        <span class="sep">·</span>
+        <span>+91 737-838-1494</span>
+        <span class="sep">·</span>
+        <span>Noida, Uttar Pradesh</span>
+        <span class="sep">·</span>
+        <a href="https://tanmaysk.in" target="_blank" rel="noopener noreferrer">tanmaysk.in</a>
+        <span class="sep">·</span>
+        <a href="https://linkedin.com/in/tanmay-kalbande" target="_blank" rel="noopener noreferrer">linkedin.com/in/tanmay-kalbande</a>
+        <span class="sep">·</span>
+        <a href="https://github.com/tanmay-kalbande" target="_blank" rel="noopener noreferrer">github.com/tanmay-kalbande</a>
+      </div>
+    </header>
+
+    <!-- SUMMARY -->
+    <section>
+      <div class="sec-label">Summary</div>
+      <p class="summary">
+        AI engineer and data analyst with 2+ years of hands-on experience designing and building AI-powered applications,
+        predictive models, and data pipelines. Independently researched, architected, and launched Pustakam Injin, a
+        production multi-model AI book generation platform, applying a deep understanding of LLM behaviour, prompt
+        engineering, and system design. Combining strong analytical thinking with practical engineering to transition
+        into a data or AI engineering role.
+      </p>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section>
+      <div class="sec-label">Experience</div>
+
+      <div class="entry">
+        <div class="entry-top">
+          <div class="entry-title">Data &amp; Support Analyst</div>
+          <div class="entry-period">Apr 2024 – Present</div>
+        </div>
+        <div class="entry-org">Capgemini</div>
+        <div class="entry-sub">Noida, Uttar Pradesh · IT Service Desk Operations</div>
+        <ul class="bullets">
+          <li>Collected and structured data from client-reported incidents, building consistent records of issue types, frequencies, and resolution paths to enable pattern analysis.</li>
+          <li>Analysed incident datasets to identify recurring problem categories, surfacing root causes not visible from individual ticket reviews.</li>
+          <li>Presented data-driven findings to clients and stakeholders, translating raw incident trends into clear, actionable recommendations for reducing recurring issues.</li>
+          <li>Designed and proposed process solutions based on pattern analysis, contributing to measurable reduction in repeat incidents within tracked client environments.</li>
+          <li><strong>Personal initiative:</strong> Built an AI-powered work-note formatter (Python + Flask + LLMs) to automate manual documentation, improving team output quality.</li>
+          <li><strong>Personal initiative:</strong> Built a dual-agent validation tool to self-review knowledge base entries before submission, improving accuracy of documentation.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-top">
+          <div class="entry-title">Data Analyst Trainee</div>
+          <div class="entry-period">Nov 2022 – Dec 2023</div>
+        </div>
+        <div class="entry-org">Rubixe</div>
+        <div class="entry-sub">Nagpur · Training role with real project deliverables</div>
+        <ul class="bullets">
+          <li>Built predictive maintenance models using Random Forest, identifying equipment failure patterns from sensor data.</li>
+          <li>Developed K-Means customer segmentation enabling data-backed marketing strategy recommendations.</li>
+          <li>Created lead scoring model with 85% accuracy, improving sales team prioritisation efficiency.</li>
+          <li>Designed Tableau dashboards translating complex analytical findings for non-technical stakeholders.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section>
+      <div class="sec-label">Projects</div>
+
+      <div class="project">
+        <div class="proj-top">
+          <span class="proj-name">Pustakam Injin</span>
+          <span class="proj-stack">Python · Flask · GPT / Gemma / Mistral / Cerebras</span>
+        </div>
+        <p class="proj-desc">
+          Independently designed and engineered a full AI book-generation platform, implementing multi-provider LLM routing,
+          stateful sequential generation with memory, and PDF export. Researched model trade-offs across GPT, Gemma, Mistral,
+          and Cerebras to optimise quality and cost. Live with real users.
+        </p>
+        <a class="proj-link" href="https://pustakamai.tanmaysk.in" target="_blank" rel="noopener noreferrer">pustakamai.tanmaysk.in</a>
+      </div>
+
+      <div class="project">
+        <div class="proj-top">
+          <span class="proj-name">Adaptive AI Learning Platform</span>
+          <span class="proj-stack">Python · Flask · Google Gemma · NLP</span>
+        </div>
+        <p class="proj-desc">
+          AI-powered learning companion with multiple teaching personas, context-aware quiz generation, and adaptive learning flowcharts for personalised education at scale.
+        </p>
+        <a class="proj-link" href="https://sakha.tanmaysk.in" target="_blank" rel="noopener noreferrer">sakha.tanmaysk.in</a>
+      </div>
+
+      <div class="project">
+        <div class="proj-top">
+          <span class="proj-name">AI Data Assistant</span>
+          <span class="proj-stack">Python · Flask · LLM backend</span>
+        </div>
+        <p class="proj-desc">
+          Conversational analytics system where users query datasets in plain English and receive automated insights, no SQL needed.
+        </p>
+      </div>
+
+      <div class="project">
+        <div class="proj-top">
+          <span class="proj-name">AI Data Structurer</span>
+          <span class="proj-stack">Python · Flask · Gemma · REST API</span>
+        </div>
+        <p class="proj-desc">
+          AI-powered tool that transforms raw, unstructured data into clean, organised formats automatically, reducing manual data preparation time and enabling faster downstream analysis.
+        </p>
+      </div>
+
+      <div class="project">
+        <div class="proj-top">
+          <span class="proj-name">8+ more deployed projects</span>
+          <span class="proj-stack">Expense Tracker · Incident Tracker · Table Extractor · Report Generator · Goal Tracker · Village Directory AI · Mindfulness App · Life Loops</span>
+        </div>
+        <a class="proj-link" href="https://github.com/tanmay-kalbande" target="_blank" rel="noopener noreferrer">github.com/tanmay-kalbande</a>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section>
+      <div class="sec-label">Skills</div>
+
+      <table class="skills-table" role="presentation" aria-label="Skills">
+        <tr>
+          <td class="sk">Languages</td>
+          <td class="sv">Python (primary) · SQL · R · JavaScript (basic)</td>
+        </tr>
+        <tr>
+          <td class="sk">AI / ML</td>
+          <td class="sv">Multi-agent systems · LLM API integration · RAG · Random Forest · K-Means · NLP · Scikit-learn</td>
+        </tr>
+        <tr>
+          <td class="sk">Frameworks</td>
+          <td class="sv">Flask · FastAPI · NumPy · Pandas · Jupyter · Streamlit</td>
+        </tr>
+        <tr>
+          <td class="sk">Data &amp; BI</td>
+          <td class="sv">Tableau · Power BI · Matplotlib · Seaborn · SQL Server · Spark (exposure)</td>
+        </tr>
+        <tr>
+          <td class="sk">Cloud</td>
+          <td class="sv">AWS (certified) · GCP · Vercel · Render · Hugging Face</td>
+        </tr>
+        <tr>
+          <td class="sk">AI Fluency</td>
+          <td class="sv">Claude · ChatGPT · Gemma · Mistral · Cerebras · Prompt engineering · LLM system design · Rapid prototyping</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- EDUCATION -->
+    <section>
+      <div class="sec-label">Education</div>
+
+      <div class="entry">
+        <div class="entry-top">
+          <div class="entry-title">B.E. Mechanical Engineering</div>
+          <div class="entry-period">2019 – 2022</div>
+        </div>
+        <div class="entry-org">Prof. Ram Meghe Institute of Technology &amp; Research, Amravati University</div>
+        <div class="entry-sub">CGPA: 9.3 / 10.0</div>
+      </div>
+
+      <div class="entry" style="margin-bottom:0;">
+        <div class="entry-top">
+          <div class="entry-title">Diploma · Mechanical Engineering</div>
+          <div class="entry-period">2016 – 2019</div>
+        </div>
+        <div class="entry-org">Government Polytechnic, Murtijapur</div>
+        <div class="entry-sub">Score: 80%</div>
+      </div>
+    </section>
+
+    <!-- CERTIFICATIONS -->
+    <section>
+      <div class="sec-label">Certifications</div>
+      <div class="cert-list">
+        <div class="cert-item">
+          <span class="cert-name">AWS Cloud Technical Essentials</span>
+          <span class="cert-meta">Amazon Web Services · Dec 2024</span>
+        </div>
+        <div class="cert-item">
+          <span class="cert-name">Foundations: Data, Data, Everywhere</span>
+          <span class="cert-meta">Google · Apr 2024</span>
+        </div>
+        <div class="cert-item">
+          <span class="cert-name">Certified Data Scientist</span>
+          <span class="cert-meta">IABAC · Sep 2023</span>
+        </div>
+        <div class="cert-item">
+          <span class="cert-name">Certified Data Scientist Bootcamp</span>
+          <span class="cert-meta">DataMites™ · Apr 2023</span>
+        </div>
+        <div class="cert-item">
+          <span class="cert-name">100 Days of Code: Python Pro Bootcamp</span>
+          <span class="cert-meta">London App Brewery</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer actions (hidden in print) -->
+    <div class="print-actions">
+      <button class="btn" onclick="window.print()">Download / Save as PDF</button>
+
+      <!-- ✅ Text size controls (small + same style as download button) -->
+      <button class="btn" id="textSmaller" type="button">A-</button>
+      <button class="btn" id="textBigger" type="button">A+</button>
+      <button class="btn" id="textReset" type="button">Reset</button>
+
+      <span class="tip">Tip: Turn OFF “Headers and footers” in print setting.</span>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      const page = document.getElementById('resumePage');
+
+      // Zoom values (global scaling for all text and layout)
+      const STEP = 0.05;
+      const MIN = 0.85;
+      const MAX = 1.25;
+
+      function getZoom() {
+        const z = parseFloat(localStorage.getItem('resumeZoom') || '1');
+        return isNaN(z) ? 1 : z;
+      }
+
+      function setZoom(z) {
+        const clamped = Math.max(MIN, Math.min(MAX, z));
+        page.style.zoom = clamped;
+        localStorage.setItem('resumeZoom', String(clamped));
+      }
+
+      // Init
+      setZoom(getZoom());
+
+      document.getElementById('textSmaller').addEventListener('click', () => {
+        setZoom(getZoom() - STEP);
+      });
+
+      document.getElementById('textBigger').addEventListener('click', () => {
+        setZoom(getZoom() + STEP);
+      });
+
+      document.getElementById('textReset').addEventListener('click', () => {
+        setZoom(1);
+      });
+    })();
+  </script>
+</body>
+</html>
