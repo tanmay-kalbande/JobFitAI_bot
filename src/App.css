@@ -981,19 +981,19 @@ body {
 .modal-actions {
   display: flex;
   gap: 0.75rem;
-  padding: 1.25rem;
+  padding: 0.75rem 1.25rem;
   border-top: 1px solid var(--border-color);
 }
 
 .modal-actions button {
   flex: 1;
+  padding: 0.6rem;
 }
 
 .modal-actions .btn-secondary {
   background: transparent;
   border: 1px solid var(--border-light);
   color: var(--text-primary);
-  padding: 0.75rem;
   font-family: inherit;
   font-size: 0.7rem;
   font-weight: 600;
@@ -1584,11 +1584,12 @@ body {
   }
 
   .modal-actions {
-    padding: 1rem;
+    padding: 0.6rem 0.75rem;
   }
 
   .modal-actions button {
-    min-height: 44px;
+    min-height: auto;
+    padding: 0.5rem;
   }
 
   /* ---- ANALYSIS MODAL ---- */
