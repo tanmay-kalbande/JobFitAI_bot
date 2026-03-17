@@ -24,6 +24,7 @@ interface AgentMessage {
     role: 'user' | 'agent';
     content: string;
     edit?: SectionEdit;
+    detectedSection?: ResumeSection;
     timestamp: number;
 }
 
@@ -34,25 +35,80 @@ export interface AIAgentPanelProps {
     onClose: () => void;
 }
 
-/* ─── Section detection ──────────────────────────────────── */
+/* ─── Section detection — handles negation & context ─────── */
 
-const SECTION_PATTERNS: [ResumeSection, RegExp][] = [
-    ['title',          /title|headline|designation|job\s*title|full\s*name/i],
-    ['summary',        /summar|summ?ery|about\s*me|objective|profile|overview|intro|bio/i],
-    ['experience',     /experience|exp\b|work|job|role|position|bullet|dut(y|ies)|achievement|employer|career/i],
-    ['skills',         /skill|technolog|tech\s*stack|tool|language|framework|competen|proficien/i],
-    ['projects',       /project|portfolio|side\s*project|\bapp\b|built|developed|github|demo/i],
-    ['certifications', /certif|licen[sc]e|credential|course|aws\b|google\s*cert/i],
-    ['education',      /educat|degree|university|college|school|gpa|graduat|studi/i],
-    ['full',           /everything|whole\s*resume|entire|full\s*resume|complete/i],
+// Maps display labels to sections (for "in experience section", "the skills tab", etc.)
+const SECTION_ALIASES: [ResumeSection, RegExp][] = [
+    ['title',          /\b(title|headline|designation|name|job\s*title)\b/i],
+    ['experience',     /\b(experience|exp|work|job|role|position|bullets?|dut(y|ies)|achievements?|career|employer|capgemini|rubixe|company)\b/i],
+    ['skills',         /\b(skills?|technolog|tech\s*stack|tools?|languages?|frameworks?|competen|proficien)\b/i],
+    ['projects',       /\b(projects?|portfolio|apps?|built|developed|github|demos?|pustakam|sakha)\b/i],
+    ['certifications', /\b(certif|licen[sc]e|credential|courses?|aws|google\s*cert)\b/i],
+    ['education',      /\b(educat|degree|university|college|school|gpa|graduat|studi)\b/i],
+    ['summary',        /\b(summar|about\s*me|objective|profile|overview|intro|bio|professional\s*summary)\b/i],
+    ['full',           /\b(everything|whole\s*resume|entire|full\s*resume|complete|all\s*sections?)\b/i],
 ];
 
-function detectSection(msg: string): ResumeSection {
-    for (const [section, pattern] of SECTION_PATTERNS) {
-        if (pattern.test(msg)) return section;
+// Tone/quality words that point to a section when used alone
+const TONE_KEYWORDS = /\b(punch|concis|shorter|longer|one.?lin|rewrite|better|improve|crisp|stronger|action\s*verbs?|quantif|numbers?|metrics?|impact)\b/i;
+
+/**
+ * Detect section with negation handling.
+ * "not in summary, in experience" → experience
+ * "summery" without negation → summary
+ */
+function detectSection(msg: string, previousSection?: ResumeSection): ResumeSection {
+    const lower = msg.toLowerCase();
+
+    // 1. Check for explicit negation patterns: "not in X", "not X", "wrong X section"
+    //    Strip the negated section from the string, then detect on the remainder
+    const negationPattern = /\b(?:not?\s+in|not\s+the|wrong|don['']?t\s+(?:touch|edit|change)|skip)\s+(\w[\w\s]*?)(?:\s+(?:section|tab|part))?\b/gi;
+    let cleanMsg = lower;
+    let match: RegExpExecArray | null;
+    while ((match = negationPattern.exec(lower)) !== null) {
+        cleanMsg = cleanMsg.replace(match[0], ' ').trim();
     }
-    if (/punch|concis|shorter|longer|one.?lin|rewrite|better|improve|crip/i.test(msg)) return 'summary';
-    return 'summary';
+
+    // 2. Also handle "in the X section/tab" explicit routing
+    const explicitIn = /\b(?:in\s+(?:the\s+)?|(?:the\s+)?)\b(experience|skills?|projects?|certif|educat|title|summary|work|job)\b/i.exec(cleanMsg);
+    if (explicitIn) {
+        const word = explicitIn[1].toLowerCase();
+        if (/experi|work|job/.test(word))   return 'experience';
+        if (/skill/.test(word))             return 'skills';
+        if (/project/.test(word))           return 'projects';
+        if (/certif/.test(word))            return 'certifications';
+        if (/educat/.test(word))            return 'education';
+        if (/title/.test(word))             return 'title';
+        if (/summar/.test(word))            return 'summary';
+    }
+
+    // 3. Score-based detection on cleanMsg
+    const scores: Partial<Record<ResumeSection, number>> = {};
+    for (const [section, pattern] of SECTION_ALIASES) {
+        const matches = cleanMsg.match(new RegExp(pattern.source, 'gi'));
+        if (matches) {
+            scores[section] = (scores[section] ?? 0) + matches.length;
+        }
+    }
+
+    if (Object.keys(scores).length > 0) {
+        // Return highest scoring section
+        return (Object.entries(scores) as [ResumeSection, number][])
+            .sort((a, b) => b[1] - a[1])[0][0];
+    }
+
+    // 4. Tone words alone → same section as previous, or ask via experience (not summary default)
+    if (TONE_KEYWORDS.test(cleanMsg)) {
+        return previousSection ?? 'experience';
+    }
+
+    // 5. If message is very short and conversational (correction), keep previous section
+    if (cleanMsg.split(/\s+/).length <= 6 && previousSection) {
+        return previousSection;
+    }
+
+    // 6. Safe default: unknown → let AI pick (send full context)
+    return 'full';
 }
 
 const SECTION_LABELS: Record<ResumeSection, string> = {
@@ -90,7 +146,6 @@ function applyPatch(base: ResumeData, patch: Partial<ResumeData>): ResumeData {
     for (const key of Object.keys(patch) as (keyof ResumeData)[]) {
         const val = patch[key] as unknown;
         if (val === undefined || val === null) continue;
-
         if (Array.isArray(val)) {
             if (val.length > 0) merged[key] = val;
         } else if (typeof val === 'object') {
@@ -126,36 +181,51 @@ async function callSectionEdit(
     settings: AISettings
 ): Promise<{ explanation: string; changes: string[]; patch: Partial<ResumeData> }> {
     const sectionData = extractSection(resume, section);
-    const ctx = history.slice(-4).map(m =>
+    const ctx = history.slice(-6).map(m =>
         `${m.role === 'user' ? 'User' : 'Agent'}: ${m.content}`
     ).join('\n');
 
     const returnFormats: Record<ResumeSection, string> = {
-        summary:        '{ "summary": "updated string here" }',
-        experience:     '{ "experiences": [ ...complete updated array ] }',
-        skills:         '{ "skills": { "languages": "...", "frameworks": "...", ... } }',
-        projects:       '{ "projects": [ ...complete updated array ] }',
-        certifications: '{ "certifications": [ ...complete updated array ] }',
-        education:      '{ "education": [ ...complete updated array ] }',
+        summary:        '{ "summary": "full updated summary string" }',
+        experience:     '{ "experiences": [ /* ALL job entries with updated bullets */ ] }',
+        skills:         '{ "skills": { "languages": "...", "frameworks": "...", /* all categories */ } }',
+        projects:       '{ "projects": [ /* ALL projects */ ] }',
+        certifications: '{ "certifications": [ /* ALL certs */ ] }',
+        education:      '{ "education": [ /* ALL education entries */ ] }',
         title:          '{ "fullName": "...", "title": "..." }',
-        full:           '{ ...complete ResumeData }',
+        full:           '{ /* complete ResumeData */ }',
     };
 
-    const prompt = `You are a precise AI resume editor. Edit ONLY the "${SECTION_LABELS[section]}" section.
+    const sectionRules: Record<ResumeSection, string> = {
+        experience:     'Keep ALL job entries. Only improve bullet points. Add metrics where possible.',
+        skills:         'Keep ALL skill categories. Only update/enhance the skill values.',
+        projects:       'Keep ALL projects. Only improve descriptions.',
+        certifications: 'Keep ALL existing certifications exactly as-is unless explicitly asked to change.',
+        education:      'Keep ALL education entries exactly as-is unless explicitly asked to change.',
+        summary:        'Rewrite/improve the summary text based on the request.',
+        title:          'Only update fullName or title fields.',
+        full:           'Improve the resume holistically based on the request.',
+    };
+
+    const prompt = `You are a professional resume editor with expert-level English writing skills.
+Edit ONLY the "${SECTION_LABELS[section]}" section of this resume.
 
 CURRENT SECTION DATA:
 ${JSON.stringify(sectionData, null, 2)}
 
-${ctx ? `CONTEXT:\n${ctx}\n` : ''}USER REQUEST: "${request}"
+${ctx ? `CONVERSATION HISTORY:\n${ctx}\n` : ''}USER REQUEST: "${request}"
 
-Apply exactly what was asked. Keep it professional.
-${section === 'experience' ? 'Keep ALL job entries. Only improve the bullet points.' : ''}
-${section === 'skills' ? 'Keep ALL skill categories. Only update the values.' : ''}
+CRITICAL RULES — read carefully:
+1. ${sectionRules[section]}
+2. ⚠️ The user's message may contain typos/spelling mistakes. DO NOT copy the user's typos into the resume. The resume must have perfect grammar and spelling.
+3. Understand the user's INTENT even if their phrasing is messy. E.g. "make teh summery one liner" means "condense the summary to one sentence".
+4. Only edit what was asked. Do not add, remove, or reformat anything that wasn't requested.
+5. Output professional, polished English in the resume content.
 
-Return ONLY this JSON (no markdown, no extra text):
+Return ONLY this JSON (no markdown, no backticks, no extra text):
 {
-  "explanation": "One clear sentence describing what changed",
-  "changes": ["Specific change description"],
+  "explanation": "One clear sentence describing exactly what was changed",
+  "changes": ["Specific change 1", "Specific change 2"],
   "patch": ${returnFormats[section]}
 }`;
 
@@ -179,12 +249,12 @@ Return ONLY this JSON (no markdown, no extra text):
 function useDrag(panelRef: React.RefObject<HTMLDivElement | null>) {
     const posRef   = useRef({ x: 0, y: 0 });
     const startRef = useRef({ mx: 0, my: 0, px: 0, py: 0 });
-    const dragging = useRef(false);
+    const initialized = useRef(false);
 
-    // Set initial position once
     useEffect(() => {
         const el = panelRef.current;
-        if (!el) return;
+        if (!el || initialized.current) return;
+        initialized.current = true;
         const rect = el.getBoundingClientRect();
         posRef.current = { x: rect.left, y: rect.top };
         el.style.left   = `${rect.left}px`;
@@ -194,37 +264,32 @@ function useDrag(panelRef: React.RefObject<HTMLDivElement | null>) {
     }, [panelRef]);
 
     const onMouseDown = useCallback((e: React.MouseEvent) => {
-        // Only drag from header (not buttons)
-        if ((e.target as HTMLElement).closest('button')) return;
-        dragging.current = true;
+        if ((e.target as HTMLElement).closest('button, textarea, input')) return;
+        e.preventDefault();
         startRef.current = {
             mx: e.clientX,
             my: e.clientY,
             px: posRef.current.x,
             py: posRef.current.y,
         };
-        e.preventDefault();
 
         const onMove = (ev: MouseEvent) => {
-            if (!dragging.current || !panelRef.current) return;
+            const el = panelRef.current;
+            if (!el) return;
             const dx = ev.clientX - startRef.current.mx;
             const dy = ev.clientY - startRef.current.my;
-            const el = panelRef.current;
-            const W = window.innerWidth;
-            const H = window.innerHeight;
-            const w = el.offsetWidth;
-            const h = el.offsetHeight;
-            const nx = Math.max(8, Math.min(W - w - 8, startRef.current.px + dx));
-            const ny = Math.max(8, Math.min(H - h - 8, startRef.current.py + dy));
+            const W  = window.innerWidth;
+            const H  = window.innerHeight;
+            const nx = Math.max(8, Math.min(W - el.offsetWidth  - 8, startRef.current.px + dx));
+            const ny = Math.max(8, Math.min(H - el.offsetHeight - 8, startRef.current.py + dy));
             posRef.current = { x: nx, y: ny };
             el.style.left = `${nx}px`;
             el.style.top  = `${ny}px`;
         };
 
         const onUp = () => {
-            dragging.current = false;
             window.removeEventListener('mousemove', onMove);
-            window.removeEventListener('mouseup', onUp);
+            window.removeEventListener('mouseup',   onUp);
         };
 
         window.addEventListener('mousemove', onMove);
@@ -234,6 +299,13 @@ function useDrag(panelRef: React.RefObject<HTMLDivElement | null>) {
     return { onMouseDown };
 }
 
+/* ─── Section picker button ──────────────────────────────── */
+
+const ALL_SECTIONS: ResumeSection[] = [
+    'summary', 'experience', 'skills', 'projects',
+    'certifications', 'education', 'title',
+];
+
 /* ─── Helpers ────────────────────────────────────────────── */
 
 const fmtTime = (ts: number) =>
@@ -242,16 +314,17 @@ const fmtTime = (ts: number) =>
 /* ─── Component ──────────────────────────────────────────── */
 
 export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPanelProps) {
-    const [messages, setMessages] = useState<AgentMessage[]>([{
-        id: 'welcome',
-        role: 'agent',
-        content: "I auto-detect which section to edit. Changes are previewed before applying — you stay in control.",
+    const [messages,    setMessages]    = useState<AgentMessage[]>([{
+        id: 'welcome', role: 'agent',
+        content: "Tell me what to change and I'll detect the section automatically. Or pick a section below to target it directly.",
         timestamp: Date.now(),
     }]);
-    const [input,     setInput]     = useState('');
-    const [loading,   setLoading]   = useState(false);
-    const [error,     setError]     = useState('');
-    const [minimized, setMinimized] = useState(false);
+    const [input,       setInput]       = useState('');
+    const [loading,     setLoading]     = useState(false);
+    const [error,       setError]       = useState('');
+    const [minimized,   setMinimized]   = useState(false);
+    // Track the last section the agent edited (for follow-up messages)
+    const lastSection = useRef<ResumeSection | undefined>(undefined);
 
     const panelRef   = useRef<HTMLDivElement>(null);
     const bottomRef  = useRef<HTMLDivElement>(null);
@@ -274,25 +347,29 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
     , [messages]);
 
     /* Send */
-    const send = async (text?: string) => {
+    const send = async (text?: string, forceSection?: ResumeSection) => {
         const userText = (text ?? input).trim();
         if (!userText || loading) return;
-        const section = detectSection(userText);
+
+        // Detect section — pass lastSection for follow-up context
+        const section = forceSection ?? detectSection(userText, lastSection.current);
+
         setMessages(prev => [...prev, {
-            id: generateId(), role: 'user', content: userText, timestamp: Date.now(),
+            id: generateId(), role: 'user', content: userText,
+            detectedSection: section, timestamp: Date.now(),
         }]);
         setInput('');
         setLoading(true);
         setError('');
         if (minimized) setMinimized(false);
+
         try {
             const result = await callSectionEdit(
                 liveResume.current, section, userText, getHistory(), settings
             );
+            lastSection.current = section;
             setMessages(prev => [...prev, {
-                id: generateId(),
-                role: 'agent',
-                content: result.explanation,
+                id: generateId(), role: 'agent', content: result.explanation,
                 edit: { section, label: SECTION_LABELS[section], patch: result.patch, changes: result.changes, status: 'pending' },
                 timestamp: Date.now(),
             }]);
@@ -303,7 +380,7 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
         }
     };
 
-    /* Approve — fully inside single setState to avoid race */
+    /* Approve — all inside single setState to prevent race */
     const approve = useCallback((msgId: string) => {
         setMessages(prev => {
             const msg = prev.find(m => m.id === msgId);
@@ -378,10 +455,28 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                     </button>
                     <button className="agf-hbtn" onClick={onClose} title="Close">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6"  y1="6" x2="18" y2="18" />
                         </svg>
                     </button>
                 </div>
+            </div>
+
+            {/* Section quick-pick bar */}
+            <div className="agf-section-bar">
+                {ALL_SECTIONS.map(s => (
+                    <button
+                        key={s}
+                        className={`agf-sec-btn ${lastSection.current === s ? 'active' : ''}`}
+                        onClick={() => inputRef.current?.focus()}
+                        onMouseDown={() => { lastSection.current = s; }}
+                        title={`Target: ${SECTION_LABELS[s]}`}
+                        disabled={loading}
+                    >
+                        <span>{SECTION_ICONS[s]}</span>
+                        <span>{SECTION_LABELS[s]}</span>
+                    </button>
+                ))}
             </div>
 
             {/* Messages */}
@@ -392,13 +487,15 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                         <div className="agf-msg-body">
                             <div className={`agf-bubble agf-bubble-${msg.role}`}>{msg.content}</div>
 
-                            {msg.role === 'user' && msg.id !== 'welcome' && (
+                            {/* Section pill on user messages */}
+                            {msg.role === 'user' && msg.detectedSection && (
                                 <div className="agf-section-pill">
-                                    {SECTION_ICONS[detectSection(msg.content)]}
-                                    <span>{SECTION_LABELS[detectSection(msg.content)]}</span>
+                                    {SECTION_ICONS[msg.detectedSection]}
+                                    <span>{SECTION_LABELS[msg.detectedSection]}</span>
                                 </div>
                             )}
 
+                            {/* Proposal */}
                             {msg.edit?.status === 'pending' && (
                                 <div className="agf-proposal">
                                     <div className="agf-proposal-top">
@@ -467,7 +564,7 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
-                    placeholder="e.g. make summary punchier, quantify experience bullets…"
+                    placeholder="Describe the change… (Enter to send, Shift+Enter for newline)"
                     rows={2}
                     disabled={loading}
                 />
