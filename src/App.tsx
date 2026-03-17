@@ -16,6 +16,7 @@ import { SkeletonResume } from './components/SkeletonResume';
 import { QuickEditModal } from './components/QuickEditModal';
 import { EditHistoryPanel } from './components/EditHistoryPanel';
 import { HomeModal } from './components/HomeModal';
+import { AIAgentPanel } from './components/AIAgentPanel';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDebounce } from './hooks/useDebounce';
 import {
@@ -40,6 +41,7 @@ function App() {
   const [error, setError] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [showHome, setShowHome] = useState(false);
+  const [showAgent, setShowAgent] = useState(false);
   const [settings, setSettings] = useState<AISettings>(DEFAULT_SETTINGS);
   const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input');
   const [versions, setVersions] = useState<ResumeVersion[]>([]);
@@ -56,7 +58,6 @@ function App() {
   const [editLogs, setEditLogs] = useState<ResumeEditLog[]>([]);
   const [showEditHistory, setShowEditHistory] = useState(false);
 
-  // Debounce resume input for auto-save
   const debouncedResumeInput = useDebounce(resumeInput, APP_CONSTANTS.DEBOUNCE_DELAY_MS);
 
   // Load saved data on mount
@@ -70,26 +71,20 @@ function App() {
     setResumeFormat(savedFormat === 'modern' ? 'modern' : 'classic');
   }, []);
 
-
-
-  // Save resume data when debounced value changes
   useEffect(() => {
     if (debouncedResumeInput) {
       setStorageString(STORAGE_KEYS.RESUME_DATA, debouncedResumeInput);
     }
   }, [debouncedResumeInput]);
 
-  // Save versions when they change
   useEffect(() => {
     setStorageItem(STORAGE_KEYS.VERSIONS, versions);
   }, [versions]);
 
-  // Save collapse state when it changes
   useEffect(() => {
     setStorageString(STORAGE_KEYS.RESUME_COLLAPSED, String(isResumeCollapsed));
   }, [isResumeCollapsed]);
 
-  // Save settings when they change
   const handleSaveSettings = useCallback((newSettings: AISettings) => {
     setSettings(newSettings);
     setStorageItem(STORAGE_KEYS.SETTINGS, newSettings);
@@ -112,7 +107,6 @@ function App() {
       setError('Please configure your Groq API key in Settings');
       return false;
     }
-
     return true;
   };
 
@@ -141,7 +135,7 @@ function App() {
       ? `${companyName} - ${jobTitle || 'Position'}`
       : type === 'fixed'
         ? 'Fixed Resume'
-        : `Base Resume`;
+        : 'Base Resume';
 
     const version: ResumeVersion = {
       id: generateId(),
@@ -158,16 +152,12 @@ function App() {
       model,
     };
 
-    setVersions((prev) => [version, ...prev.slice(0, APP_CONSTANTS.MAX_VERSIONS - 1)]); // Keep last MAX_VERSIONS
+    setVersions(prev => [version, ...prev.slice(0, APP_CONSTANTS.MAX_VERSIONS - 1)]);
     setCurrentVersion(version);
   };
 
   const handleGenerateResume = async () => {
-    if (!resumeInput.trim()) {
-      setError('Please enter your resume information');
-      return;
-    }
-
+    if (!resumeInput.trim()) { setError('Please enter your resume information'); return; }
     if (!validateSettings()) return;
 
     setError('');
@@ -181,6 +171,7 @@ function App() {
       saveVersion(resume, 'base', undefined, undefined, undefined, undefined, undefined, undefined, getModelUsed());
       setActiveTab('preview');
       setShowChanges(false);
+      setShowAgent(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate resume');
     } finally {
@@ -190,16 +181,8 @@ function App() {
   };
 
   const handleGenerateTailoredResume = async () => {
-    if (!resumeInput.trim()) {
-      setError('Please enter your resume information');
-      return;
-    }
-
-    if (!jobDescription.trim()) {
-      setError('Please enter a job description to tailor your resume');
-      return;
-    }
-
+    if (!resumeInput.trim()) { setError('Please enter your resume information'); return; }
+    if (!jobDescription.trim()) { setError('Please enter a job description to tailor your resume'); return; }
     if (!validateSettings()) return;
 
     setError('');
@@ -220,19 +203,14 @@ function App() {
       }
 
       saveVersion(
-        result.resume,
-        'tailored',
-        result.companyName,
-        result.jobTitle,
-        result.changes,
-        keywords,
-        result.alignmentScore,
-        result.alignmentDetails,
+        result.resume, 'tailored',
+        result.companyName, result.jobTitle,
+        result.changes, keywords,
+        result.alignmentScore, result.alignmentDetails,
         getModelUsed()
       );
 
       setActiveTab('preview');
-      // Don't auto-open changes panel - let user open it manually
       setShowChanges(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate tailored resume');
@@ -244,19 +222,16 @@ function App() {
 
   const handleAnalyzeResume = async () => {
     if (!generatedResume) return;
-
     setIsLoading(true);
     setLoadingMessage('Performing smart analysis...');
-
     try {
       const result = await analyzeResume(generatedResume, jobDescription, settings);
       setAnalysis(result);
-      // Trigger confetti for high scores!
       if (result.score >= 90) {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 100);
       }
-    } catch (err) {
+    } catch {
       setError('Analysis failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -270,40 +245,21 @@ function App() {
     setAtsKeywords(version.atsKeywords || []);
     setActiveTab('preview');
     setShowHistory(false);
-    if (version.changes && version.changes.length > 0) {
-      setShowChanges(true);
-    } else {
-      setShowChanges(false);
-    }
+    setShowChanges(!!(version.changes && version.changes.length > 0));
   };
 
   const handleFixIssues = async () => {
     if (!generatedResume || !analysis) return;
-
     setIsFixing(true);
-
     try {
       const result = await fixResumeWeaknesses(
-        generatedResume,
-        analysis.weaknesses,
-        analysis.improvements,
-        settings
+        generatedResume, analysis.weaknesses, analysis.improvements, settings
       );
-
-      // Save as new version
       saveVersion(
-        result.resume,
-        'fixed',
-        'Fixed Resume',
-        'Improved Version',
-        result.fixes,
-        currentVersion?.atsKeywords || [],
-        undefined,
-        undefined,
-        getModelUsed()
+        result.resume, 'fixed', 'Fixed Resume', 'Improved Version',
+        result.fixes, currentVersion?.atsKeywords || [],
+        undefined, undefined, getModelUsed()
       );
-
-      // Close analysis modal and show changes
       setAnalysis(null);
       setShowChanges(true);
     } catch (err) {
@@ -314,46 +270,23 @@ function App() {
   };
 
   const handleDeleteVersion = (id: string) => {
-    setVersions((prev) => prev.filter((v) => v.id !== id));
-    if (currentVersion?.id === id) {
-      setCurrentVersion(null);
-    }
+    setVersions(prev => prev.filter(v => v.id !== id));
+    if (currentVersion?.id === id) setCurrentVersion(null);
   };
 
   const handleDownloadPDF = () => {
-    // Generate PDF filename: UserName_Resume_CompanyName.pdf
     const userName = settings.userName?.trim();
     const companyName = currentVersion?.companyName?.trim();
-
     let filename = 'Resume';
-
-    if (userName) {
-      // Convert "John Doe" to "John_Doe"
-      const formattedName = userName.replace(/\s+/g, '_');
-      filename = `${formattedName}_Resume`;
-    }
-
-    if (companyName) {
-      // Add company name if tailored for a specific company
-      const formattedCompany = companyName.replace(/\s+/g, '_');
-      filename = `${filename}_${formattedCompany}`;
-    }
-
-    // Set document title (browsers use this as PDF filename)
+    if (userName) filename = `${userName.replace(/\s+/g, '_')}_Resume`;
+    if (companyName) filename = `${filename}_${companyName.replace(/\s+/g, '_')}`;
     const originalTitle = document.title;
     document.title = filename;
-
     window.print();
-
-    // Restore original title after print dialog
-    setTimeout(() => {
-      document.title = originalTitle;
-    }, 1000);
+    setTimeout(() => { document.title = originalTitle; }, 1000);
   };
 
-  const handleClearData = useCallback(() => {
-    setShowClearConfirm(true);
-  }, []);
+  const handleClearData = useCallback(() => { setShowClearConfirm(true); }, []);
 
   const confirmClearData = useCallback(() => {
     setResumeInput('');
@@ -362,20 +295,14 @@ function App() {
   }, []);
 
   const handleExportData = () => {
-    const exportData = {
-      version: 1,
-      resumeInput,
-      settings,
-      exportDate: new Date().toISOString()
-    };
-    
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "jobfit_backup.json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const exportData = { version: 1, resumeInput, settings, exportDate: new Date().toISOString() };
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
+    const a = document.createElement('a');
+    a.setAttribute('href', dataStr);
+    a.setAttribute('download', 'jobfit_backup.json');
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   const handleImportData = () => {
@@ -385,22 +312,15 @@ function App() {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
-          const contents = event.target?.result as string;
-          const parsed = JSON.parse(contents);
-          
-          if (parsed.resumeInput !== undefined) {
-            setResumeInput(parsed.resumeInput);
-          }
-          if (parsed.settings) {
-            handleSaveSettings({ ...DEFAULT_SETTINGS, ...parsed.settings });
-          }
+          const parsed = JSON.parse(event.target?.result as string);
+          if (parsed.resumeInput !== undefined) setResumeInput(parsed.resumeInput);
+          if (parsed.settings) handleSaveSettings({ ...DEFAULT_SETTINGS, ...parsed.settings });
           alert('Data imported successfully!');
-        } catch (e) {
-          alert('Error parsing backup file. Please ensure it is a valid JobFit backup.');
+        } catch {
+          alert('Error parsing backup file.');
         }
       };
       reader.readAsText(file);
@@ -419,28 +339,38 @@ function App() {
 
   const handleQuickEditSave = (updatedData: ResumeData, description: string) => {
     if (!generatedResume) return;
-    // Log the edit
     const log: ResumeEditLog = {
       id: generateId(),
       timestamp: Date.now(),
       description,
       previousData: { ...generatedResume },
     };
-    setEditLogs((prev) => [log, ...prev]);
+    setEditLogs(prev => [log, ...prev]);
     setGeneratedResume(updatedData);
     setShowQuickEdit(false);
   };
 
+  // ← Called by AI Agent when user approves a proposal
+  const handleAgentApply = (newResume: ResumeData, description: string) => {
+    if (!generatedResume) return;
+    const log: ResumeEditLog = {
+      id: generateId(),
+      timestamp: Date.now(),
+      description: `AI Agent: ${description}`,
+      previousData: { ...generatedResume },
+    };
+    setEditLogs(prev => [log, ...prev]);
+    setGeneratedResume(newResume);
+  };
+
   const handleRevertEdit = (log: ResumeEditLog) => {
     setGeneratedResume(log.previousData);
-    // Remove this log and all newer logs
-    setEditLogs((prev) => {
-      const idx = prev.findIndex((l) => l.id === log.id);
+    setEditLogs(prev => {
+      const idx = prev.findIndex(l => l.id === log.id);
       return prev.slice(idx + 1);
     });
   };
 
-  // Keyboard shortcuts
   useKeyboardShortcuts({
     onGenerate: handleGenerateResume,
     onTailor: handleGenerateTailoredResume,
@@ -454,9 +384,9 @@ function App() {
 
   return (
     <div className="app">
-      {/* Confetti Animation for 90+ scores */}
       <Confetti trigger={showConfetti} />
-      {/* Floating Header */}
+
+      {/* Header */}
       <header className="app-header no-print">
         <div className="header-left">
           <div className="logo">
@@ -465,10 +395,10 @@ function App() {
           </div>
         </div>
         <div className="header-right">
-          <button className="icon-btn" onClick={() => setShowHome(true)} title="Home Dashboard">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          <button className="icon-btn" onClick={() => setShowHome(true)} title="Resume History">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
           </button>
           <button
@@ -476,8 +406,8 @@ function App() {
             onClick={() => setShowHistory(!showHistory)}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12,6 12,12 16,14"></polyline>
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12,6 12,12 16,14" />
             </svg>
             {versions.length > 0 && <span className="badge-count">{versions.length}</span>}
           </button>
@@ -491,22 +421,22 @@ function App() {
           </div>
           <button className="icon-btn" onClick={() => setShowSettings(true)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
           </button>
         </div>
       </header>
 
-      {/* Tab Navigation (Mobile) */}
+      {/* Mobile tabs */}
       <div className="tab-nav no-print">
         <button
           className={`tab-btn ${activeTab === 'input' ? 'active' : ''}`}
           onClick={() => setActiveTab('input')}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
           Input
         </button>
@@ -516,8 +446,8 @@ function App() {
           disabled={!generatedResume}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14,2 14,8 20,8"></polyline>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
           </svg>
           Preview
         </button>
@@ -541,14 +471,18 @@ function App() {
         {/* Input Panel */}
         <div className={`panel input-panel no-print ${activeTab === 'input' ? 'active' : ''}`}>
           <div className="panel-inner">
-            {/* Resume Data Card - Collapsible */}
+            {/* Resume Data Card */}
             <div className={`card collapsible-card ${isResumeCollapsed ? 'collapsed' : ''}`}>
-              <div className="card-header" onClick={() => resumeInput && setIsResumeCollapsed(!isResumeCollapsed)} style={{ cursor: resumeInput ? 'pointer' : 'default' }}>
+              <div
+                className="card-header"
+                onClick={() => resumeInput && setIsResumeCollapsed(!isResumeCollapsed)}
+                style={{ cursor: resumeInput ? 'pointer' : 'default' }}
+              >
                 <div className="header-title">
                   {resumeInput && (
                     <span className={`collapse-icon ${isResumeCollapsed ? 'collapsed' : ''}`}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="6,9 12,15 18,9"></polyline>
+                        <polyline points="6,9 12,15 18,9" />
                       </svg>
                     </span>
                   )}
@@ -558,23 +492,25 @@ function App() {
                   )}
                 </div>
                 {resumeInput && !isResumeCollapsed && (
-                  <button className="text-btn" onClick={(e) => { e.stopPropagation(); handleClearData(); }}>Clear</button>
+                  <button className="text-btn" onClick={e => { e.stopPropagation(); handleClearData(); }}>
+                    Clear
+                  </button>
                 )}
               </div>
               {!isResumeCollapsed && (
                 <>
                   <textarea
                     value={resumeInput}
-                    onChange={(e) => setResumeInput(e.target.value)}
+                    onChange={e => setResumeInput(e.target.value)}
                     placeholder="Paste all your resume details here...&#10;&#10;Include: contact info, work experience, skills, education, projects, certifications, etc."
                     rows={10}
                   />
                   <div className="card-footer">
                     <span className="saved-indicator">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17,21 17,13 7,13 7,21"></polyline>
-                        <polyline points="7,3 7,8 15,8"></polyline>
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                        <polyline points="17,21 17,13 7,13 7,21" />
+                        <polyline points="7,3 7,8 15,8" />
                       </svg>
                       Auto-saved
                     </span>
@@ -591,66 +527,45 @@ function App() {
               </div>
               <textarea
                 value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste the job description here to tailor your resume for this specific role..."
+                onChange={e => setJobDescription(e.target.value)}
+                placeholder="Paste the job description here to tailor your resume..."
                 rows={6}
               />
-
-              {/* ATS Toggle */}
               <label className="toggle-label">
-                <input
-                  type="checkbox"
-                  checked={atsEnabled}
-                  onChange={(e) => setAtsEnabled(e.target.checked)}
-                />
-                <span className="toggle-switch"></span>
+                <input type="checkbox" checked={atsEnabled} onChange={e => setAtsEnabled(e.target.checked)} />
+                <span className="toggle-switch" />
                 <div className="toggle-text">
                   <span>ATS Optimization</span>
                   <span className="toggle-hint">Extract keywords & tune resume for job</span>
                 </div>
               </label>
-
-              {/* Hidden Keywords Toggle - only show when ATS is enabled */}
               {atsEnabled && (
                 <label className="toggle-label toggle-nested">
-                  <input
-                    type="checkbox"
-                    checked={showHiddenKeywords}
-                    onChange={(e) => setShowHiddenKeywords(e.target.checked)}
-                  />
-                  <span className="toggle-switch"></span>
+                  <input type="checkbox" checked={showHiddenKeywords} onChange={e => setShowHiddenKeywords(e.target.checked)} />
+                  <span className="toggle-switch" />
                   <div className="toggle-text">
                     <span>Hidden Keywords</span>
-                    <span className="toggle-hint">Embed invisible keywords in PDF for ATS (use for smaller companies)</span>
+                    <span className="toggle-hint">Embed invisible keywords in PDF for ATS</span>
                   </div>
                 </label>
               )}
             </div>
 
-            {/* Error Display */}
             {error && (
               <div className="error-message">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="15" y1="9" x2="9" y2="15"></line>
-                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="15" y1="9" x2="9" y2="15" />
+                  <line x1="9" y1="9" x2="15" y2="15" />
                 </svg>
                 {error}
               </div>
             )}
 
-            {/* Action Buttons */}
             <div className="action-buttons">
-              <button
-                className="btn-primary"
-                onClick={handleGenerateResume}
-                disabled={isLoading}
-              >
+              <button className="btn-primary" onClick={handleGenerateResume} disabled={isLoading}>
                 {isLoading && !jobDescription ? (
-                  <>
-                    <span className="spinner-small"></span>
-                    Generating...
-                  </>
+                  <><span className="spinner-small" />Generating...</>
                 ) : (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -660,21 +575,14 @@ function App() {
                   </>
                 )}
               </button>
-              <button
-                className="btn-outline"
-                onClick={handleGenerateTailoredResume}
-                disabled={isLoading || !jobDescription.trim()}
-              >
+              <button className="btn-outline" onClick={handleGenerateTailoredResume} disabled={isLoading || !jobDescription.trim()}>
                 {isLoading && jobDescription ? (
-                  <>
-                    <span className="spinner-small"></span>
-                    Tailoring...
-                  </>
+                  <><span className="spinner-small" />Tailoring...</>
                 ) : (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 20h9"></path>
-                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                     </svg>
                     Tailor for Job
                   </>
@@ -682,13 +590,12 @@ function App() {
               </button>
             </div>
 
-            {/* Loading Indicator */}
             {isLoading && (
               <div className="loading-card">
                 <div className="loading-animation">
-                  <div className="loading-dot"></div>
-                  <div className="loading-dot"></div>
-                  <div className="loading-dot"></div>
+                  <div className="loading-dot" />
+                  <div className="loading-dot" />
+                  <div className="loading-dot" />
                 </div>
                 <span>{loadingMessage}</span>
               </div>
@@ -700,8 +607,8 @@ function App() {
         <div className={`panel preview-panel ${activeTab === 'preview' ? 'active' : ''}`}>
           {generatedResume ? (
             <>
+              {/* Toolbar */}
               <div className="preview-toolbar no-print">
-                {/* Row 1: Title + Format + Changes */}
                 <div className="toolbar-row">
                   <div className="toolbar-left">
                     <h3>{currentVersion?.name || 'Resume Preview'}</h3>
@@ -732,12 +639,27 @@ function App() {
                     </div>
                   </div>
                 </div>
-                {/* Row 2: Action Buttons */}
+
                 <div className="toolbar-actions">
+                  {/* AI Agent button */}
+                  <button
+                    className={`toolbar-action-btn toolbar-action-agent ${showAgent ? 'active' : ''}`}
+                    onClick={() => { setShowAgent(!showAgent); if (showAgent) {} }}
+                    title="Open AI Resume Agent"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
+                      <circle cx="9" cy="14" r="1" />
+                      <circle cx="15" cy="14" r="1" />
+                    </svg>
+                    AI Agent
+                    {showAgent && <span className="toolbar-badge" style={{ background: '#22c55e' }}>●</span>}
+                  </button>
+
                   <button className="toolbar-action-btn" onClick={() => setShowQuickEdit(true)}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
                     Edit
                   </button>
@@ -752,24 +674,27 @@ function App() {
                     History
                     {editLogs.length > 0 && <span className="toolbar-badge">{editLogs.length}</span>}
                   </button>
-                  <button className="toolbar-action-btn toolbar-action-analyze" onClick={handleAnalyzeResume} disabled={isLoading}>
+                  <button
+                    className="toolbar-action-btn toolbar-action-analyze"
+                    onClick={handleAnalyzeResume}
+                    disabled={isLoading}
+                  >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
                     Analyze
                   </button>
                   <button className="btn-download" onClick={handleDownloadPDF}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7,10 12,15 17,10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7,10 12,15 17,10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                     PDF
                   </button>
                 </div>
               </div>
 
-              {/* Changes Panel */}
               {/* Edit History Panel */}
               {showEditHistory && (
                 <EditHistoryPanel
@@ -779,28 +704,39 @@ function App() {
                 />
               )}
 
+              {/* Changes Panel */}
               {showChanges && currentVersion && (currentVersion.changes?.length || currentVersion.atsKeywords?.length) && (
-                <ChangesView
-                  version={currentVersion}
-                  onClose={() => setShowChanges(false)}
-                />
+                <ChangesView version={currentVersion} onClose={() => setShowChanges(false)} />
               )}
 
-              <>
-                <div className="resume-wrapper">
+              {/* Resume + Agent overlay */}
+              <div className="preview-body">
+                <div className={`resume-wrapper ${showAgent ? 'resume-wrapper-shrunk' : ''}`}>
                   {resumeFormat === 'modern' ? (
                     <ResumeTemplateModern
                       data={generatedResume}
-                      atsKeywords={showHiddenKeywords && (atsEnabled || currentVersion?.atsKeywords?.length) ? (currentVersion?.atsKeywords || atsKeywords) : undefined}
+                      atsKeywords={showHiddenKeywords && (atsEnabled || currentVersion?.atsKeywords?.length)
+                        ? (currentVersion?.atsKeywords || atsKeywords) : undefined}
                     />
                   ) : (
                     <ResumeTemplate
                       data={generatedResume}
-                      atsKeywords={showHiddenKeywords && (atsEnabled || currentVersion?.atsKeywords?.length) ? (currentVersion?.atsKeywords || atsKeywords) : undefined}
+                      atsKeywords={showHiddenKeywords && (atsEnabled || currentVersion?.atsKeywords?.length)
+                        ? (currentVersion?.atsKeywords || atsKeywords) : undefined}
                     />
                   )}
                 </div>
-              </>
+
+                {/* AI Agent Panel */}
+                {showAgent && (
+                  <AIAgentPanel
+                    resume={generatedResume}
+                    settings={settings}
+                    onApply={handleAgentApply}
+                    onClose={() => setShowAgent(false)}
+                  />
+                )}
+              </div>
             </>
           ) : isLoading ? (
             <>
@@ -827,13 +763,13 @@ function App() {
       <footer className="app-footer no-print">
         <div className="footer-ticker">
           <span>
-            🔥 Latest: Cerebras Llama 3.1 8B added • Cerebras Qwen 3 235B added • GPT-OSS 120B optimizations live • Layout fix completed for all model selection tabs side-by-side!
+            🔥 Latest: Cerebras Llama 3.1 8B added • Cerebras Qwen 3 235B added • GPT-OSS 120B optimizations live • AI Agent now available for conversational resume editing!
           </span>
         </div>
         <p>Built with ❤️ by <span>Tanmay Kalbande</span></p>
       </footer>
 
-      {/* Settings Modal */}
+      {/* Modals */}
       {showSettings && (
         <SettingsModal
           settings={settings}
@@ -843,8 +779,6 @@ function App() {
           onImportData={handleImportData}
         />
       )}
-
-      {/* Analysis Modal */}
       {analysis && (
         <AnalysisModal
           analysis={analysis}
@@ -853,7 +787,6 @@ function App() {
           isFixing={isFixing}
         />
       )}
-      {/* Quick Edit Modal */}
       {showQuickEdit && generatedResume && (
         <QuickEditModal
           data={generatedResume}
@@ -861,16 +794,14 @@ function App() {
           onClose={() => setShowQuickEdit(false)}
         />
       )}
-
-      {/* Home Modal */}
       {showHome && (
         <HomeModal
           versions={versions}
           onClose={() => setShowHome(false)}
           onSelectVersion={handleSelectVersion}
+          onDeleteVersion={handleDeleteVersion}
         />
       )}
-      {/* Confirm Clear Modal */}
       {showClearConfirm && (
         <ConfirmModal
           title="Clear Resume Data"
@@ -886,13 +817,10 @@ function App() {
   );
 }
 
-// Wrap App with ErrorBoundary for crash protection
-function AppWithErrorBoundary() {
+export default function AppWithErrorBoundary() {
   return (
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
   );
 }
-
-export default AppWithErrorBoundary;
