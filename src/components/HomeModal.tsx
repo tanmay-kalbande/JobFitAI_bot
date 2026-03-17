@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ResumeVersion } from '../types';
 import { formatTimestamp } from '../types';
 
