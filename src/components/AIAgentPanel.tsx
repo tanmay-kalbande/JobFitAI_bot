@@ -88,42 +88,47 @@ function extractSection(resume: ResumeData, section: ResumeSection): unknown {
 /* ─── Safe patch merge ───────────────────────────────────── */
 
 function applyPatch(base: ResumeData, patch: Partial<ResumeData>): ResumeData {
-    const merged: ResumeData = { ...base };
+    // Use unknown as intermediate to avoid TypeScript index-signature errors
+    const merged = { ...base } as unknown as Record<string, unknown>;
+    const baseMap = base as unknown as Record<string, unknown>;
 
-    // Only overwrite keys that exist in patch and have truthy/non-empty values
     for (const key of Object.keys(patch) as (keyof ResumeData)[]) {
-        const val = patch[key];
+        const val = patch[key] as unknown;
         if (val === undefined || val === null) continue;
 
-        // For arrays: only overwrite if patch has non-empty array
+        // Arrays: only overwrite if patch has non-empty array
         if (Array.isArray(val)) {
-            if (val.length > 0) (merged as Record<string, unknown>)[key] = val;
+            if (val.length > 0) merged[key] = val;
         }
-        // For objects (skills, etc.): merge deeply
-        else if (typeof val === 'object' && !Array.isArray(val)) {
-            const existing = (base as Record<string, unknown>)[key];
-            if (existing && typeof existing === 'object') {
-                (merged as Record<string, unknown>)[key] = { ...existing as object, ...val as object };
+        // Objects (skills): deep merge
+        else if (typeof val === 'object') {
+            const existing = baseMap[key];
+            if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
+                merged[key] = { ...(existing as object), ...(val as object) };
             } else {
-                (merged as Record<string, unknown>)[key] = val;
+                merged[key] = val;
             }
         }
-        // Strings/primitives: overwrite directly
-        else if (typeof val === 'string' && val.trim().length > 0) {
-            (merged as Record<string, unknown>)[key] = val;
-        } else if (typeof val !== 'string') {
-            (merged as Record<string, unknown>)[key] = val;
+        // Strings: only overwrite if non-empty
+        else if (typeof val === 'string') {
+            if (val.trim().length > 0) merged[key] = val;
+        }
+        // Other primitives
+        else {
+            merged[key] = val;
         }
     }
 
-    // Safety: never drop critical arrays
-    if (!merged.education?.length)      merged.education      = base.education      ?? [];
-    if (!merged.customSections?.length) merged.customSections = base.customSections ?? [];
-    if (!merged.certifications?.length) merged.certifications = base.certifications ?? [];
-    if (!merged.experiences?.length)    merged.experiences    = base.experiences    ?? [];
-    if (!merged.projects?.length)       merged.projects       = base.projects       ?? [];
+    const result = merged as unknown as ResumeData;
 
-    return merged;
+    // Safety: never drop critical arrays
+    if (!result.education?.length)      result.education      = base.education      ?? [];
+    if (!result.customSections?.length) result.customSections = base.customSections ?? [];
+    if (!result.certifications?.length) result.certifications = base.certifications ?? [];
+    if (!result.experiences?.length)    result.experiences    = base.experiences    ?? [];
+    if (!result.projects?.length)       result.projects       = base.projects       ?? [];
+
+    return result;
 }
 
 /* ─── AI call (section-targeted) ────────────────────────── */
