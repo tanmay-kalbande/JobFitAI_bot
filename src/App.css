@@ -3700,6 +3700,7 @@ body {
 
 .preview-body {
   flex: 1;
+  display: flex;
   overflow: hidden;
   position: relative;
   min-height: 0;
@@ -4173,11 +4174,11 @@ body {
   animation: spin 0.7s linear infinite;
 }
 
-/* ── Toolbar button ── */
+/* AI Agent toolbar button — matches other toolbar buttons, no purple */
 .toolbar-action-agent.active {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(99,102,241,0.08);
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 /* ── Responsive ── */
@@ -4194,4 +4195,24 @@ body {
   }
 
   .agent-fab { bottom: 14px; right: 14px; }
+}
+
+/* ── Drag handle styles ── */
+.agf-drag-handle {
+  cursor: grab;
+  user-select: none;
+}
+
+.agf-drag-handle:active {
+  cursor: grabbing;
+}
+
+.agf-drag-hint {
+  font-size: 1rem;
+  color: var(--text-muted);
+  opacity: 0.4;
+  letter-spacing: -2px;
+  pointer-events: none;
+  flex: 1;
+  text-align: center;
 }
