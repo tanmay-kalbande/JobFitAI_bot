@@ -34,29 +34,25 @@ export interface AIAgentPanelProps {
     onClose: () => void;
 }
 
-/* ─── Section detection (fuzzy + keyword) ────────────────── */
+/* ─── Section detection ──────────────────────────────────── */
 
-// Each entry: exact keywords + regex patterns for typo tolerance
 const SECTION_PATTERNS: [ResumeSection, RegExp][] = [
-    ['title',          /\btitle|headline|designation|job\s*title|full\s*name|heading\b/i],
-    ['summary',        /\bsummar|summ?ery|about\s*me|objective|profile|overview|intro|bio\b/i],
-    ['experience',     /\bexperience|exp\b|work|job|role|position|bullet|dut(y|ies)|achievement|employer|career|company\b/i],
-    ['skills',         /\bskill|technolog|tech\s*stack|tool|language|framework|competen|proficien\b/i],
-    ['projects',       /\bproject|portfolio|side\s*project|\bapp\b|built|developed|github|demo\b/i],
-    ['certifications', /\bcertif|certif?ication|licen[sc]e|credential|course|aws\b|google\s*cert\b/i],
-    ['education',      /\beducat|degree|university|college|school|gpa|graduat|studi\b/i],
-    ['full',           /\beverything|whole\s*resume|entire|full\s*resume|complete\b/i],
+    ['title',          /title|headline|designation|job\s*title|full\s*name/i],
+    ['summary',        /summar|summ?ery|about\s*me|objective|profile|overview|intro|bio/i],
+    ['experience',     /experience|exp\b|work|job|role|position|bullet|dut(y|ies)|achievement|employer|career/i],
+    ['skills',         /skill|technolog|tech\s*stack|tool|language|framework|competen|proficien/i],
+    ['projects',       /project|portfolio|side\s*project|\bapp\b|built|developed|github|demo/i],
+    ['certifications', /certif|licen[sc]e|credential|course|aws\b|google\s*cert/i],
+    ['education',      /educat|degree|university|college|school|gpa|graduat|studi/i],
+    ['full',           /everything|whole\s*resume|entire|full\s*resume|complete/i],
 ];
 
 function detectSection(msg: string): ResumeSection {
     for (const [section, pattern] of SECTION_PATTERNS) {
         if (pattern.test(msg)) return section;
     }
-    // Tone/quality words without section → likely summary
-    if (/punch|concis|shorter|longer|one.?lin|rewrite|better|improve|crip/i.test(msg)) {
-        return 'summary';
-    }
-    return 'summary'; // safe default — editing summary is least destructive
+    if (/punch|concis|shorter|longer|one.?lin|rewrite|better|improve|crip/i.test(msg)) return 'summary';
+    return 'summary';
 }
 
 const SECTION_LABELS: Record<ResumeSection, string> = {
@@ -88,7 +84,6 @@ function extractSection(resume: ResumeData, section: ResumeSection): unknown {
 /* ─── Safe patch merge ───────────────────────────────────── */
 
 function applyPatch(base: ResumeData, patch: Partial<ResumeData>): ResumeData {
-    // Use unknown as intermediate to avoid TypeScript index-signature errors
     const merged = { ...base } as unknown as Record<string, unknown>;
     const baseMap = base as unknown as Record<string, unknown>;
 
@@ -96,42 +91,32 @@ function applyPatch(base: ResumeData, patch: Partial<ResumeData>): ResumeData {
         const val = patch[key] as unknown;
         if (val === undefined || val === null) continue;
 
-        // Arrays: only overwrite if patch has non-empty array
         if (Array.isArray(val)) {
             if (val.length > 0) merged[key] = val;
-        }
-        // Objects (skills): deep merge
-        else if (typeof val === 'object') {
+        } else if (typeof val === 'object') {
             const existing = baseMap[key];
             if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
                 merged[key] = { ...(existing as object), ...(val as object) };
             } else {
                 merged[key] = val;
             }
-        }
-        // Strings: only overwrite if non-empty
-        else if (typeof val === 'string') {
+        } else if (typeof val === 'string') {
             if (val.trim().length > 0) merged[key] = val;
-        }
-        // Other primitives
-        else {
+        } else {
             merged[key] = val;
         }
     }
 
     const result = merged as unknown as ResumeData;
-
-    // Safety: never drop critical arrays
     if (!result.education?.length)      result.education      = base.education      ?? [];
     if (!result.customSections?.length) result.customSections = base.customSections ?? [];
     if (!result.certifications?.length) result.certifications = base.certifications ?? [];
     if (!result.experiences?.length)    result.experiences    = base.experiences    ?? [];
     if (!result.projects?.length)       result.projects       = base.projects       ?? [];
-
     return result;
 }
 
-/* ─── AI call (section-targeted) ────────────────────────── */
+/* ─── AI call ────────────────────────────────────────────── */
 
 async function callSectionEdit(
     resume: ResumeData,
@@ -163,7 +148,7 @@ ${JSON.stringify(sectionData, null, 2)}
 
 ${ctx ? `CONTEXT:\n${ctx}\n` : ''}USER REQUEST: "${request}"
 
-Apply exactly what was asked. Keep it professional and concise.
+Apply exactly what was asked. Keep it professional.
 ${section === 'experience' ? 'Keep ALL job entries. Only improve the bullet points.' : ''}
 ${section === 'skills' ? 'Keep ALL skill categories. Only update the values.' : ''}
 
@@ -175,22 +160,78 @@ Return ONLY this JSON (no markdown, no extra text):
 }`;
 
     const raw = await callAI(prompt, settings);
-    const text = raw.trim();
-
     let parsed: { explanation?: string; changes?: string[]; patch?: Partial<ResumeData> };
     try {
-        parsed = JSON.parse(extractJSON(text));
+        parsed = JSON.parse(extractJSON(raw.trim()));
     } catch {
         throw new Error('AI returned invalid JSON. Please try again.');
     }
-
     if (!parsed.patch) throw new Error('AI did not return a valid change. Please try again.');
-
     return {
         explanation: parsed.explanation ?? 'Section updated.',
         changes:     Array.isArray(parsed.changes) ? parsed.changes : [],
         patch:       parsed.patch,
     };
+}
+
+/* ─── Drag hook ──────────────────────────────────────────── */
+
+function useDrag(panelRef: React.RefObject<HTMLDivElement | null>) {
+    const posRef   = useRef({ x: 0, y: 0 });
+    const startRef = useRef({ mx: 0, my: 0, px: 0, py: 0 });
+    const dragging = useRef(false);
+
+    // Set initial position once
+    useEffect(() => {
+        const el = panelRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        posRef.current = { x: rect.left, y: rect.top };
+        el.style.left   = `${rect.left}px`;
+        el.style.top    = `${rect.top}px`;
+        el.style.right  = 'auto';
+        el.style.bottom = 'auto';
+    }, [panelRef]);
+
+    const onMouseDown = useCallback((e: React.MouseEvent) => {
+        // Only drag from header (not buttons)
+        if ((e.target as HTMLElement).closest('button')) return;
+        dragging.current = true;
+        startRef.current = {
+            mx: e.clientX,
+            my: e.clientY,
+            px: posRef.current.x,
+            py: posRef.current.y,
+        };
+        e.preventDefault();
+
+        const onMove = (ev: MouseEvent) => {
+            if (!dragging.current || !panelRef.current) return;
+            const dx = ev.clientX - startRef.current.mx;
+            const dy = ev.clientY - startRef.current.my;
+            const el = panelRef.current;
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            const w = el.offsetWidth;
+            const h = el.offsetHeight;
+            const nx = Math.max(8, Math.min(W - w - 8, startRef.current.px + dx));
+            const ny = Math.max(8, Math.min(H - h - 8, startRef.current.py + dy));
+            posRef.current = { x: nx, y: ny };
+            el.style.left = `${nx}px`;
+            el.style.top  = `${ny}px`;
+        };
+
+        const onUp = () => {
+            dragging.current = false;
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+        };
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup',   onUp);
+    }, [panelRef]);
+
+    return { onMouseDown };
 }
 
 /* ─── Helpers ────────────────────────────────────────────── */
@@ -204,7 +245,7 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
     const [messages, setMessages] = useState<AgentMessage[]>([{
         id: 'welcome',
         role: 'agent',
-        content: "I auto-detect which section to edit from your message. Every change is shown as a preview — nothing is applied until you approve.",
+        content: "I auto-detect which section to edit. Changes are previewed before applying — you stay in control.",
         timestamp: Date.now(),
     }]);
     const [input,     setInput]     = useState('');
@@ -212,14 +253,14 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
     const [error,     setError]     = useState('');
     const [minimized, setMinimized] = useState(false);
 
+    const panelRef   = useRef<HTMLDivElement>(null);
     const bottomRef  = useRef<HTMLDivElement>(null);
     const inputRef   = useRef<HTMLTextAreaElement>(null);
-
-    // Always keep the freshest resume in a ref for async callbacks
     const liveResume = useRef<ResumeData>(resume);
     useEffect(() => { liveResume.current = resume; }, [resume]);
 
-    // Scroll to bottom on new messages
+    const { onMouseDown } = useDrag(panelRef);
+
     useEffect(() => {
         if (!minimized) {
             setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
@@ -232,22 +273,18 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
             .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }))
     , [messages]);
 
-    /* Send ─────────────────────────────────────────────── */
+    /* Send */
     const send = async (text?: string) => {
         const userText = (text ?? input).trim();
         if (!userText || loading) return;
-
         const section = detectSection(userText);
-        const userMsgId = generateId();
-
         setMessages(prev => [...prev, {
-            id: userMsgId, role: 'user', content: userText, timestamp: Date.now(),
+            id: generateId(), role: 'user', content: userText, timestamp: Date.now(),
         }]);
         setInput('');
         setLoading(true);
         setError('');
         if (minimized) setMinimized(false);
-
         try {
             const result = await callSectionEdit(
                 liveResume.current, section, userText, getHistory(), settings
@@ -256,13 +293,7 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                 id: generateId(),
                 role: 'agent',
                 content: result.explanation,
-                edit: {
-                    section,
-                    label: SECTION_LABELS[section],
-                    patch: result.patch,
-                    changes: result.changes,
-                    status: 'pending',
-                },
+                edit: { section, label: SECTION_LABELS[section], patch: result.patch, changes: result.changes, status: 'pending' },
                 timestamp: Date.now(),
             }]);
         } catch (e) {
@@ -272,60 +303,39 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
         }
     };
 
-    /* Approve ── FIX: find message first, apply synchronously ── */
+    /* Approve — fully inside single setState to avoid race */
     const approve = useCallback((msgId: string) => {
-        // Find the message directly from state snapshot — avoids setState callback race
         setMessages(prev => {
             const msg = prev.find(m => m.id === msgId);
             if (!msg?.edit || msg.edit.status !== 'pending') return prev;
-
-            // Apply patch and call onApply synchronously here
             const newResume = applyPatch(liveResume.current, msg.edit.patch);
             onApply(newResume, `[${msg.edit.label}] ${msg.edit.changes.join('; ')}`);
-
-            const updated = prev.map(m =>
-                m.id === msgId
+            return [
+                ...prev.map(m => m.id === msgId
                     ? { ...m, edit: { ...m.edit!, status: 'approved' as ProposalStatus } }
                     : m
-            );
-
-            return [
-                ...updated,
-                {
-                    id: generateId(),
-                    role: 'agent' as const,
-                    content: '✓ Applied. Revert anytime via Edit History.',
-                    timestamp: Date.now(),
-                },
+                ),
+                { id: generateId(), role: 'agent' as const, content: '✓ Applied. Revert anytime via Edit History.', timestamp: Date.now() },
             ];
         });
     }, [onApply]);
 
-    /* Reject ─────────────────────────────────────────── */
+    /* Reject */
     const reject = useCallback((msgId: string) => {
-        setMessages(prev => {
-            const updated = prev.map(m =>
-                m.id === msgId && m.edit
-                    ? { ...m, edit: { ...m.edit, status: 'rejected' as ProposalStatus } }
-                    : m
-            );
-            return [
-                ...updated,
-                {
-                    id: generateId(),
-                    role: 'agent' as const,
-                    content: "Discarded. What would you like differently?",
-                    timestamp: Date.now(),
-                },
-            ];
-        });
+        setMessages(prev => [
+            ...prev.map(m => m.id === msgId && m.edit
+                ? { ...m, edit: { ...m.edit, status: 'rejected' as ProposalStatus } }
+                : m
+            ),
+            { id: generateId(), role: 'agent' as const, content: "Discarded. What would you like differently?", timestamp: Date.now() },
+        ]);
     }, []);
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
     };
 
-    /* FAB ────────────────────────────────────────────── */
+    /* FAB */
     if (minimized) {
         return (
             <button className="agent-fab" onClick={() => setMinimized(false)} title="Open AI Agent">
@@ -339,12 +349,11 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
         );
     }
 
-    /* Panel ──────────────────────────────────────────── */
     return (
-        <div className="agent-float">
+        <div className="agent-float" ref={panelRef}>
 
-            {/* Header */}
-            <div className="agf-header">
+            {/* Header — drag handle */}
+            <div className="agf-header agf-drag-handle" onMouseDown={onMouseDown}>
                 <div className="agf-header-left">
                     <div className="agf-avatar">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -360,6 +369,7 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                         </div>
                     </div>
                 </div>
+                <div className="agf-drag-hint">⠿</div>
                 <div className="agf-hbtns">
                     <button className="agf-hbtn" onClick={() => setMinimized(true)} title="Minimise">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -380,12 +390,8 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                     <div key={msg.id} className={`agf-msg agf-msg-${msg.role}`}>
                         {msg.role === 'agent' && <div className="agf-avatar-sm">✦</div>}
                         <div className="agf-msg-body">
+                            <div className={`agf-bubble agf-bubble-${msg.role}`}>{msg.content}</div>
 
-                            <div className={`agf-bubble agf-bubble-${msg.role}`}>
-                                {msg.content}
-                            </div>
-
-                            {/* Section pill — shown on user messages */}
                             {msg.role === 'user' && msg.id !== 'welcome' && (
                                 <div className="agf-section-pill">
                                     {SECTION_ICONS[detectSection(msg.content)]}
@@ -393,7 +399,6 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                                 </div>
                             )}
 
-                            {/* Proposal card */}
                             {msg.edit?.status === 'pending' && (
                                 <div className="agf-proposal">
                                     <div className="agf-proposal-top">
@@ -423,19 +428,14 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                                 </div>
                             )}
 
-                            {msg.edit?.status === 'approved' && (
-                                <div className="agf-pstatus ok">✓ applied</div>
-                            )}
-                            {msg.edit?.status === 'rejected' && (
-                                <div className="agf-pstatus no">✕ discarded</div>
-                            )}
+                            {msg.edit?.status === 'approved' && <div className="agf-pstatus ok">✓ applied</div>}
+                            {msg.edit?.status === 'rejected' && <div className="agf-pstatus no">✕ discarded</div>}
 
                             <span className="agf-time">{fmtTime(msg.timestamp)}</span>
                         </div>
                     </div>
                 ))}
 
-                {/* Typing indicator */}
                 {loading && (
                     <div className="agf-msg agf-msg-agent">
                         <div className="agf-avatar-sm">✦</div>
@@ -445,19 +445,17 @@ export function AIAgentPanel({ resume, settings, onApply, onClose }: AIAgentPane
                     </div>
                 )}
 
-                {/* Error */}
                 {error && (
                     <div className="agf-err">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="8" x2="12" y2="13" />
+                            <line x1="12" y1="8"  x2="12"    y2="13" />
                             <line x1="12" y1="16" x2="12.01" y2="16" />
                         </svg>
                         {error}
                         <button onClick={() => setError('')}>×</button>
                     </div>
                 )}
-
                 <div ref={bottomRef} />
             </div>
 
