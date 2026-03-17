@@ -869,7 +869,7 @@ body {
   gap: 0.4rem;
   background: #f1f3f7;
   border-radius: 16px;
-  margin: 1rem 1.25rem;
+  margin: 1rem 0;
   /* Separated from header/footer */
   border: none;
 }
@@ -1661,7 +1661,7 @@ body {
   }
 
   .provider-tabs {
-    margin: 0.5rem 0.75rem;
+    margin: 0.5rem 0;
   }
 
   .provider-tabs .tab {
