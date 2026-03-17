@@ -16,6 +16,7 @@ import { SkeletonResume } from './components/SkeletonResume';
 import { QuickEditModal } from './components/QuickEditModal';
 import { EditHistoryPanel } from './components/EditHistoryPanel';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { DashboardView } from './components/DashboardView';
 import { useDebounce } from './hooks/useDebounce';
 import {
   STORAGE_KEYS,
@@ -38,6 +39,7 @@ function App() {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [activeView, setActiveView] = useState<'editor' | 'dashboard'>('editor');
   const [settings, setSettings] = useState<AISettings>(DEFAULT_SETTINGS);
   const [activeTab, setActiveTab] = useState<'input' | 'preview'>('input');
   const [versions, setVersions] = useState<ResumeVersion[]>([]);
@@ -114,11 +116,54 @@ function App() {
     return true;
   };
 
+  const handleExportBackup = () => {
+    const backupData = {
+      baseResume: resumeInput,
+      settings,
+      versions,
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `JobFitAI_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (data.baseResume !== undefined) {
+          setResumeInput(data.baseResume);
+          setStorageString(STORAGE_KEYS.RESUME_DATA, data.baseResume);
+        }
+        if (data.settings) {
+          setSettings(data.settings);
+          setStorageItem(STORAGE_KEYS.SETTINGS, data.settings);
+        }
+        if (data.versions) {
+          setVersions(data.versions);
+          setStorageItem(STORAGE_KEYS.VERSIONS, data.versions);
+        }
+        alert('Backup imported successfully!');
+      } catch (err) {
+        alert('Invalid backup file');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const saveVersion = (
     data: ResumeData,
     type: 'base' | 'tailored' | 'fixed',
     companyName?: string,
     jobTitle?: string,
+    modelUsed?: string,
     changes?: string[],
     keywords?: string[],
     alignmentScore?: number,
@@ -138,6 +183,7 @@ function App() {
       type,
       companyName,
       jobTitle,
+      modelUsed,
       atsKeywords: keywords,
       changes,
       alignmentScore,
@@ -164,7 +210,10 @@ function App() {
       const resume = await generateBaseResume(resumeInput, settings);
       setGeneratedResume(resume);
       setAtsKeywords([]);
-      saveVersion(resume, 'base');
+      
+      const currentModel = settings.provider === 'google' ? settings.googleModel : settings.provider === 'cerebras' ? settings.cerebrasModel : settings.provider === 'mistral' ? settings.mistralModel : settings.groqModel;
+      saveVersion(resume, 'base', undefined, undefined, currentModel);
+      
       setActiveTab('preview');
       setShowChanges(false);
     } catch (err) {
@@ -205,11 +254,13 @@ function App() {
         setAtsKeywords([]);
       }
 
+      const currentModel = settings.provider === 'google' ? settings.googleModel : settings.provider === 'cerebras' ? settings.cerebrasModel : settings.provider === 'mistral' ? settings.mistralModel : settings.groqModel;
       saveVersion(
         result.resume,
         'tailored',
         result.companyName,
         result.jobTitle,
+        currentModel,
         result.changes,
         keywords,
         result.alignmentScore,
@@ -275,12 +326,14 @@ function App() {
         settings
       );
 
+      const currentModel = settings.provider === 'google' ? settings.googleModel : settings.provider === 'cerebras' ? settings.cerebrasModel : settings.provider === 'mistral' ? settings.mistralModel : settings.groqModel;
       // Save as new version
       saveVersion(
         result.resume,
         'fixed',
         'Fixed Resume',
         'Improved Version',
+        currentModel,
         result.fixes,
         currentVersion?.atsKeywords || []
       );
@@ -387,6 +440,14 @@ function App() {
     hasJobDescription: !!jobDescription.trim(),
   });
 
+  const groupedVersions = versions.reduce((acc, curr) => {
+    if (curr.companyName) {
+      if (!acc[curr.companyName]) acc[curr.companyName] = [];
+      acc[curr.companyName].push(curr);
+    }
+    return acc;
+  }, {} as Record<string, ResumeVersion[]>);
+
   return (
     <div className="app">
       {/* Confetti Animation for 90+ scores */}
@@ -394,10 +455,20 @@ function App() {
       {/* Floating Header */}
       <header className="app-header no-print">
         <div className="header-left">
-          <div className="logo">
+          <div className="logo" onClick={() => setActiveView('editor')} style={{ cursor: 'pointer' }}>
             <span className="logo-icon">◈</span>
             <span className="logo-text">JOBFIT</span>
           </div>
+          <button 
+            className={`view-toggle-btn ${activeView === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveView(activeView === 'dashboard' ? 'editor' : 'dashboard')}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <span>{activeView === 'dashboard' ? 'Editor' : 'Home'}</span>
+          </button>
         </div>
         <div className="header-right">
           <button
@@ -453,7 +524,16 @@ function App() {
       </div>
 
       <main className="main-content">
-        {/* Version History Sidebar */}
+        {activeView === 'dashboard' ? (
+          <DashboardView 
+            groupedVersions={groupedVersions} 
+            onSelectVersion={(v) => { handleSelectVersion(v); setActiveView('editor'); }}
+            onExport={handleExportBackup}
+            onImport={handleImportBackup}
+          />
+        ) : (
+          <>
+            {/* Version History Sidebar */}
         <div className={`history-sidebar no-print ${showHistory ? 'open' : ''}`}>
           <div className="sidebar-header">
             <h3>Version History</h3>
@@ -751,6 +831,8 @@ function App() {
             </div>
           )}
         </div>
+        </>
+        )}
       </main>
 
       <footer className="app-footer no-print">
