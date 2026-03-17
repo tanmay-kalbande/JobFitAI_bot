@@ -102,7 +102,7 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                                     setLocalSettings({ ...localSettings, provider: 'nvidia' });
                                 }}
                             >
-                                <div className="tab-icon-fallback" style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#76b900', color: 'white', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>N</div>
+                                <img src="/nvidia.svg" alt="Nvidia" className="tab-icon-img" />
                                 Nvidia
                             </button>
                             <button
@@ -113,7 +113,7 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
                                     setLocalSettings({ ...localSettings, provider: 'cloudflare' });
                                 }}
                             >
-                                <div className="tab-icon-fallback" style={{ width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f6821f', color: 'white', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold' }}>C</div>
+                                <img src="/cloudflare.svg" alt="Cloudflare" className="tab-icon-img" />
                                 Cloudflare
                             </button>
                         </div>

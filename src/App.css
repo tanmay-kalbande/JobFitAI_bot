@@ -3039,7 +3039,7 @@ body {
 
 .dropdown-menu-inner {
   padding: 0.5rem;
-  max-height: 240px;
+  max-height: 140px;
   overflow-y: auto;
 }
 
