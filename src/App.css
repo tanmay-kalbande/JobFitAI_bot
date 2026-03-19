@@ -2538,10 +2538,6 @@ body {
   .resume-container .header { padding: 20px 30px !important; }
   .resume-container .content { padding: 20px 30px !important; }
 
-  .print-page-spacer {
-    display: block !important;
-  }
-
   .resume-container .section,
   .resume-modern .rm-section {
     page-break-inside: avoid !important;
@@ -3752,12 +3748,6 @@ body {
 }
 
 .resume-wrapper-shrunk { flex: 1; }
-
-.print-page-spacer {
-  display: none;
-  width: 100%;
-  pointer-events: none;
-}
 
 /* ========================================
    AGENT FAB — minimised pill button
