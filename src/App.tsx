@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ResumeData, AISettings, ResumeVersion, ResumeFormat, ResumeEditLog } from './types';
 import { DEFAULT_SETTINGS, generateId, APP_CONSTANTS } from './types';
 import { generateBaseResume, generateTailoredResume, extractATSKeywords, fixResumeWeaknesses } from './services/aiService';
@@ -29,6 +29,112 @@ import {
 } from './utils/storage';
 import './App.css';
 
+const PRINT_SPACER_ATTR = 'data-print-page-spacer';
+const PRINT_LAYOUT_TOLERANCE = 8;
+const PRINTABLE_A4_HEIGHT_MM = 297 - 25.4;
+
+function measurePrintablePageHeight(): number {
+  const probe = document.createElement('div');
+  probe.style.position = 'absolute';
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  probe.style.height = `${PRINTABLE_A4_HEIGHT_MM}mm`;
+  probe.style.width = '1px';
+  probe.style.left = '-9999px';
+  probe.style.top = '0';
+  document.body.appendChild(probe);
+  const height = probe.getBoundingClientRect().height;
+  probe.remove();
+  return height;
+}
+
+function clearPrintSpacers(root: HTMLElement | null) {
+  if (!root) return;
+  root.querySelectorAll<HTMLElement>(`[${PRINT_SPACER_ATTR}]`).forEach((spacer) => spacer.remove());
+}
+
+function insertPrintSpacer(beforeElement: Element, height: number) {
+  if (height <= PRINT_LAYOUT_TOLERANCE || !beforeElement.parentElement) return 0;
+
+  const spacer = document.createElement('div');
+  spacer.setAttribute(PRINT_SPACER_ATTR, 'true');
+  spacer.className = 'print-page-spacer';
+  spacer.setAttribute('aria-hidden', 'true');
+  spacer.style.height = `${height}px`;
+  beforeElement.parentElement.insertBefore(spacer, beforeElement);
+  return height;
+}
+
+function preparePrintLayout(root: HTMLElement | null) {
+  if (!root) return;
+
+  clearPrintSpacers(root);
+
+  const pageHeight = measurePrintablePageHeight();
+  if (!pageHeight) return;
+
+  const container = root.querySelector<HTMLElement>('.resume-container, .resume-modern');
+  if (!container) return;
+
+  const containerTop = container.getBoundingClientRect().top;
+  const isModern = container.classList.contains('resume-modern');
+  const sectionSelector = isModern ? ':scope > .rm-section' : ':scope .content > .section';
+  const titleSelector = isModern ? '.rm-sec-label' : '.section-title';
+  const sections = Array.from(container.querySelectorAll<HTMLElement>(sectionSelector));
+
+  let offsetAdjustment = 0;
+
+  for (const section of sections) {
+    const sectionRect = section.getBoundingClientRect();
+    const sectionTop = sectionRect.top - containerTop + offsetAdjustment;
+    const sectionHeight = sectionRect.height;
+    const usedOnPage = sectionTop % pageHeight;
+    const remainingOnPage = pageHeight - usedOnPage;
+
+    if (sectionHeight <= pageHeight - PRINT_LAYOUT_TOLERANCE && sectionHeight > remainingOnPage + PRINT_LAYOUT_TOLERANCE) {
+      offsetAdjustment += insertPrintSpacer(section, remainingOnPage);
+      continue;
+    }
+
+    if (sectionHeight <= pageHeight) {
+      continue;
+    }
+
+    const title = section.querySelector<HTMLElement>(titleSelector);
+    const sectionChildren = Array.from(section.children).filter(
+      (child): child is HTMLElement => child instanceof HTMLElement && child !== title
+    );
+
+    if (!title || sectionChildren.length === 0) {
+      continue;
+    }
+
+    const firstChild = sectionChildren[0];
+    const titleRect = title.getBoundingClientRect();
+    const firstChildRect = firstChild.getBoundingClientRect();
+    const firstBlockHeight = (firstChildRect.bottom - titleRect.top) + PRINT_LAYOUT_TOLERANCE;
+    const firstBlockTop = titleRect.top - containerTop + offsetAdjustment;
+    const firstBlockUsed = firstBlockTop % pageHeight;
+    const firstBlockRemaining = pageHeight - firstBlockUsed;
+
+    if (firstBlockHeight <= pageHeight - PRINT_LAYOUT_TOLERANCE && firstBlockHeight > firstBlockRemaining + PRINT_LAYOUT_TOLERANCE) {
+      offsetAdjustment += insertPrintSpacer(section, firstBlockRemaining);
+    }
+
+    for (const child of sectionChildren.slice(1)) {
+      const childRect = child.getBoundingClientRect();
+      const childTop = childRect.top - containerTop + offsetAdjustment;
+      const childHeight = childRect.height;
+      const childUsed = childTop % pageHeight;
+      const childRemaining = pageHeight - childUsed;
+
+      if (childHeight <= pageHeight - PRINT_LAYOUT_TOLERANCE && childHeight > childRemaining + PRINT_LAYOUT_TOLERANCE) {
+        offsetAdjustment += insertPrintSpacer(child, childRemaining);
+      }
+    }
+  }
+}
+
 function App() {
   const [resumeInput, setResumeInput] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -57,6 +163,7 @@ function App() {
   const [showQuickEdit, setShowQuickEdit] = useState(false);
   const [editLogs, setEditLogs] = useState<ResumeEditLog[]>([]);
   const [showEditHistory, setShowEditHistory] = useState(false);
+  const resumeWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const debouncedResumeInput = useDebounce(resumeInput, APP_CONSTANTS.DEBOUNCE_DELAY_MS);
 
@@ -84,6 +191,19 @@ function App() {
   useEffect(() => {
     setStorageString(STORAGE_KEYS.RESUME_COLLAPSED, String(isResumeCollapsed));
   }, [isResumeCollapsed]);
+
+  useEffect(() => {
+    const handleBeforePrint = () => preparePrintLayout(resumeWrapperRef.current);
+    const handleAfterPrint = () => clearPrintSpacers(resumeWrapperRef.current);
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
 
   const handleSaveSettings = useCallback((newSettings: AISettings) => {
     setSettings(newSettings);
@@ -282,8 +402,12 @@ function App() {
     if (companyName) filename = `${filename}_${companyName.replace(/\s+/g, '_')}`;
     const originalTitle = document.title;
     document.title = filename;
+    preparePrintLayout(resumeWrapperRef.current);
     window.print();
-    setTimeout(() => { document.title = originalTitle; }, 1000);
+    setTimeout(() => {
+      document.title = originalTitle;
+      clearPrintSpacers(resumeWrapperRef.current);
+    }, 1000);
   };
 
   const handleClearData = useCallback(() => { setShowClearConfirm(true); }, []);
@@ -711,7 +835,10 @@ function App() {
 
               {/* Resume + Agent overlay */}
               <div className="preview-body">
-                <div className={`resume-wrapper ${showAgent ? 'resume-wrapper-shrunk' : ''}`}>
+                <div
+                  ref={resumeWrapperRef}
+                  className={`resume-wrapper ${showAgent ? 'resume-wrapper-shrunk' : ''}`}
+                >
                   {resumeFormat === 'modern' ? (
                     <ResumeTemplateModern
                       data={generatedResume}
