@@ -27,6 +27,7 @@ import {
   setStorageString,
   removeStorageItem,
 } from './utils/storage';
+import { generatePDF } from './utils/pdfGenerator';
 import './App.css';
 
 function App() {
@@ -274,17 +275,39 @@ function App() {
     if (currentVersion?.id === id) setCurrentVersion(null);
   };
 
-  const handleDownloadPDF = () => {
+  // ── NEW PDF logic from App2 ──────────────────────────────────────────────
+  const handleDownloadPDF = async () => {
     const userName = settings.userName?.trim();
     const companyName = currentVersion?.companyName?.trim();
+
     let filename = 'Resume';
-    if (userName) filename = `${userName.replace(/\s+/g, '_')}_Resume`;
-    if (companyName) filename = `${filename}_${companyName.replace(/\s+/g, '_')}`;
-    const originalTitle = document.title;
-    document.title = filename;
-    window.print();
-    setTimeout(() => { document.title = originalTitle; }, 1000);
+
+    if (userName) {
+      const formattedName = userName.replace(/\s+/g, '_');
+      filename = `${formattedName}_Resume`;
+    }
+
+    if (companyName) {
+      const formattedCompany = companyName.replace(/\s+/g, '_');
+      filename = `${filename}_${formattedCompany}`;
+    }
+
+    setIsLoading(true);
+    setLoadingMessage('Generating PDF...');
+
+    try {
+      await generatePDF('resume-cv-content', {
+        filename: `${filename}.pdf`,
+      });
+    } catch (err) {
+      console.error('PDF Generation failed:', err);
+      setError('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage('');
+    }
   };
+  // ────────────────────────────────────────────────────────────────────────
 
   const handleClearData = useCallback(() => { setShowClearConfirm(true); }, []);
 
@@ -350,7 +373,6 @@ function App() {
     setShowQuickEdit(false);
   };
 
-  // ← Called by AI Agent when user approves a proposal
   const handleAgentApply = (newResume: ResumeData, description: string) => {
     if (!generatedResume) return;
     const log: ResumeEditLog = {
@@ -644,7 +666,7 @@ function App() {
                   {/* AI Agent button */}
                   <button
                     className={`toolbar-action-btn toolbar-action-agent ${showAgent ? 'active' : ''}`}
-                    onClick={() => { setShowAgent(!showAgent); if (showAgent) {} }}
+                    onClick={() => setShowAgent(!showAgent)}
                     title="Open AI Resume Agent"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -684,13 +706,13 @@ function App() {
                     </svg>
                     Analyze
                   </button>
-                  <button className="btn-download" onClick={handleDownloadPDF}>
+                  <button className="btn-download" onClick={handleDownloadPDF} disabled={isLoading}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                       <polyline points="7,10 12,15 17,10" />
                       <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    PDF
+                    {isLoading && loadingMessage === 'Generating PDF...' ? 'Generating...' : 'PDF'}
                   </button>
                 </div>
               </div>
