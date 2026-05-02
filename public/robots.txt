@@ -1,0 +1,6 @@
+# JobFit AI — Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://jobfit.tanmaysk.in/sitemap.xml

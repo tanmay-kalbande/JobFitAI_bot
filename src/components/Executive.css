@@ -1,0 +1,350 @@
+/* ============================================================
+   EXECUTIVE v2 — Premium Swiss Editorial / Quiet Luxury
+   Full-width, no sidebar, breathable whitespace, hairline rules
+   ============================================================ */
+
+.re2-root {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #1a1a2e;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  padding: 56px 64px 52px;
+  box-shadow: 0 12px 48px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.04);
+  border-radius: 16px;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow: hidden;
+}
+
+
+/* ── Header ── */
+.re2-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.re2-name-block { flex: 1; min-width: 240px; }
+
+.re2-name {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #0f172a;
+  line-height: 1.05;
+  margin: 0 0 8px 0;
+}
+
+.re2-role {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.re2-contact-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.re2-contact-item {
+  font-size: 11.5px;
+  color: #64748b;
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ── Rules ── */
+.re2-rule-top {
+  height: 1px;
+  background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 50%, #e2e8f0 100%);
+  margin-bottom: 32px;
+}
+
+.re2-rule-bottom {
+  height: 1px;
+  background: #e2e8f0;
+  margin-top: 36px;
+}
+
+/* ── Body ── */
+.re2-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Section ── */
+.re2-section {
+  display: grid;
+  grid-template-columns: 135px 1fr;
+  gap: 0 40px;
+  padding: 24px 0;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.3s ease;
+}
+
+.re2-section:last-child { border-bottom: none; padding-bottom: 0; }
+
+.re2-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+  padding-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+.re2-section-content { min-width: 0; }
+
+/* ── Summary ── */
+.re2-summary {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: #334155;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* ── Entry (experience, project, edu) ── */
+.re2-entry {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.re2-entry:last-child { margin-bottom: 0; }
+
+.re2-entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 8px;
+}
+
+.re2-entry-left { flex: 1; min-width: 0; }
+
+.re2-entry-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.re2-entry-title a { color: inherit; text-decoration: none; position: relative; }
+.re2-entry-title a::after {
+  content: '';
+  position: absolute; width: 100%; transform: scaleX(0); height: 1px;
+  bottom: 0; left: 0; background-color: #0f172a; transform-origin: bottom right; transition: transform 0.25s ease-out;
+}
+.re2-entry-title a:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+
+.re2-entry-sub {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.re2-entry-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+/* ── Bullets ── */
+.re2-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+
+.re2-bullets li {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #475569;
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+
+.re2-bullets li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #cbd5e1;
+  font-weight: 300;
+  font-size: 14px;
+}
+
+/* ── Project description ── */
+.re2-proj-desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #475569;
+  margin: 8px 0 0;
+  font-weight: 400;
+}
+
+/* ── Skills ── */
+.re2-skills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.re2-skill-row {
+  display: grid;
+  grid-template-columns: 145px 1fr;
+  gap: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.re2-skill-cat {
+  font-weight: 600;
+  color: #334155;
+}
+
+.re2-skill-val {
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* ── Certifications ── */
+.re2-cert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.re2-cert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.re2-cert-name {
+  font-weight: 600;
+  color: #334155;
+}
+
+.re2-cert-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Cover letter body ── */
+.re2-letter-body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.re2-letter-body p {
+  margin: 0 0 16px;
+}
+
+/* ── Print ── */
+@media print {
+  .re2-root {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 15mm 20mm !important; /* Proper print margins */
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  .re2-root::before { display: none !important; }
+  .re2-section { border-bottom: 1px solid #e2e8f0 !important; }
+}
+
+/* ============================================================
+   CLASSIC TEMPLATE — Polished refinements
+   ============================================================ */
+
+/* Cleaner header — drop emoji, tighten spacing */
+.resume-container .contact-info span {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Tighter section title — less loud */
+.resume-container .section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  border-bottom: 1.5px solid #1a1a1a;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  color: #111;
+}
+
+/* Experience: clean left accent */
+.resume-container .experience-item {
+  border-left: 2px solid #1a1a1a;
+  padding-left: 16px;
+}
+
+/* Cert layout */
+.resume-container .cert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.resume-container .cert-item:last-child { border-bottom: none; }
+
+/* ============================================================
+   MODERN TEMPLATE — Polished refinements
+   ============================================================ */
+
+/* Slightly more generous section gap */
+.resume-modern .rm-section {
+  margin-bottom: 26px;
+}
+
+/* Tighter label — more refined */
+.resume-modern .rm-sec-label {
+  font-size: 8.5px;
+  letter-spacing: 3px;
+}
+
+/* Entry: tighten up */
+.resume-modern .rm-entry {
+  margin-bottom: 18px;
+}
+
+/* Project name: slightly heavier */
+.resume-modern .rm-proj-name {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+/* Skills table: more breathing room per row */
+.resume-modern .rm-skills-table td {
+  padding: 6px 0;
+}
