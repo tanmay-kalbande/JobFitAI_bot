@@ -271,7 +271,6 @@
   .re2-root {
     box-shadow: none !important;
     border-radius: 0 !important;
-    padding: 15mm 20mm !important; /* Proper print margins */
     max-width: none !important;
     margin: 0 !important;
   }
