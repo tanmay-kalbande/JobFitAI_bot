@@ -2464,7 +2464,9 @@ a { color: inherit; text-decoration: none; }
   .panel.preview-panel { display: block !important; height: auto !important; overflow: visible !important; background: white !important; }
   .preview-body { display: block !important; overflow: visible !important; height: auto !important; }
   .resume-wrapper { padding: 0 !important; overflow: visible !important; height: auto !important; background: white !important; display: block !important; }
-  .resume-container, .resume-modern, .cv-classic, .cv-modern, .cover-letter-modern { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 !important; padding: 0 !important; font-weight: 400 !important; text-align: left !important; }
+  .resume-container, .resume-modern, .cv-classic, .cv-modern, .cover-letter-modern { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 !important; font-weight: 400 !important; text-align: left !important; }
+  .resume-container { padding: 0 !important; }
+  .resume-modern, .cv-classic, .cv-modern, .cover-letter-modern { padding: 10mm 15mm !important; }
   .resume-container .section, .resume-modern .rm-section { break-inside: avoid; page-break-inside: avoid; }
   .resume-container .section-title, .resume-modern .rm-sec-label { break-after: avoid; page-break-after: avoid; }
   @page { size: A4; margin: 0; }

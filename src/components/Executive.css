@@ -273,7 +273,7 @@
     border-radius: 0 !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 10mm 15mm !important;
   }
   .re2-root::before { display: none !important; }
   .re2-section { border-bottom: 1px solid #e2e8f0 !important; }
