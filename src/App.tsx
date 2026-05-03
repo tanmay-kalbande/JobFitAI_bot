@@ -11,9 +11,7 @@ import { generateBaseResume, generateTailoredResume, generateCoverLetter, genera
 import { ResumeTemplate } from './components/ResumeTemplate';
 import { ResumeTemplateModern } from './components/ResumeTemplateModern';
 import { ResumeTemplateExecutive } from './components/ResumeTemplateExecutive';
-import { CVTemplate } from './components/CVTemplate';
-import { CVTemplateModern } from './components/CVTemplateModern';
-import { CVTemplateExecutive } from './components/CVTemplateExecutive';
+
 import { CoverLetterTemplate } from './components/CoverLetterTemplate';
 import { CoverLetterTemplateModern } from './components/CoverLetterTemplateModern';
 import { CoverLetterTemplateExecutive } from './components/CoverLetterTemplateExecutive';
