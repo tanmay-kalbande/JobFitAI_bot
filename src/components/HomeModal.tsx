@@ -49,6 +49,17 @@ export function HomeModal({ versions, onClose, onSelectVersion, onDeleteVersion,
         return { icon: '○', color: '#9ca3b8', label: 'Base' };
     };
 
+    const getVersionLabel = (version: ResumeVersion) => {
+        const looksLikeSinglePage = version.type === 'base'
+            && !!(version.companyName || version.jobTitle)
+            && Array.isArray(version.changes)
+            && version.changes.length > 0;
+        if (version.documentLayout === 'single-page' || looksLikeSinglePage) {
+            return { icon: '1P', color: '#38bdf8', label: 'One Page' };
+        }
+        return typeLabel(version.type);
+    };
+
     const content = (
         <>
             <div className="modal-header hm-header">
@@ -119,7 +130,7 @@ export function HomeModal({ versions, onClose, onSelectVersion, onDeleteVersion,
                                     </div>
                                 ) : (
                                     filteredVersions.map(version => {
-                                        const t = typeLabel(version.type);
+                                        const t = getVersionLabel(version);
                                         return (
                                             <div
                                                 key={version.id}

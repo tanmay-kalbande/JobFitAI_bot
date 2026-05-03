@@ -158,6 +158,42 @@ function getSaveHealthCopy(status: SaveHealthStatus, lastSavedAt: string | null)
   }
 }
 
+function isSinglePageResumeVersion(version: ResumeVersion | null): boolean {
+  if (!version) return false;
+  if (version.documentLayout === 'single-page') return true;
+
+  return version.type === 'base'
+    && !!(version.companyName || version.jobTitle)
+    && Array.isArray(version.changes)
+    && version.changes.length > 0;
+}
+
+function getVersionTypeInfo(version: ResumeVersion) {
+  if (isSinglePageResumeVersion(version)) {
+    return { marker: '1P', label: 'One Page', color: '#38bdf8' };
+  }
+  if (version.type === 'cover-letter') return { marker: 'CL', label: 'Cover Letter', color: '#c26b2d' };
+  if (version.type === 'tailored') return { marker: 'T', label: 'Tailored', color: '#3b9eff' };
+  if (version.type === 'fixed') return { marker: 'F', label: 'Fixed', color: '#22c55e' };
+  if (version.type === 'cv') return { marker: 'CV', label: 'CV', color: '#0f766e' };
+  return { marker: 'R', label: 'Resume', color: '#a78bfa' };
+}
+
+function formatVersionAge(timestamp: number): string {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const now = new Date();
+  const diffMin = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 60000));
+  if (diffMin < 1) return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}h ago`;
+
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
 function getPersistenceSignature(state: Omit<PersistedAppState, 'savedAt'>): string {
   return JSON.stringify(state);
 }
@@ -427,6 +463,7 @@ function AppContent() {
     setCurrentVersion(restoredSession.currentVersion ? cleanResumeVersion(restoredSession.currentVersion) : null);
     setIsResumeCollapsed(restoredSession.isResumeCollapsed);
     setResumeFormat(restoredSession.resumeFormat);
+    setIsSinglePageMode(isSinglePageResumeVersion(restoredSession.currentVersion));
     setEditLogs(cleanResumeEditLogs(restoredSession.editLogs));
   }, [
     setResumeInput, setJobDescription, setGeneratedResume, setGeneratedCoverLetter,
@@ -522,10 +559,13 @@ function AppContent() {
     alignmentScore?: number,
     alignmentDetails?: { matchingPoints: string[]; missingPoints: string[] },
     model?: string,
-    proofMap?: ResumeVersion['proofMap']
+    proofMap?: ResumeVersion['proofMap'],
+    documentLayout?: ResumeVersion['documentLayout']
   ) => {
     let name = 'Base Resume';
-    if (type === 'tailored' && companyName) name = `${companyName} - ${jobTitle || 'Position'}`;
+    if (documentLayout === 'single-page' && companyName) name = `${companyName} - ${jobTitle || 'Resume'} One Page`;
+    else if (documentLayout === 'single-page') name = 'Single Page Resume';
+    else if (type === 'tailored' && companyName) name = `${companyName} - ${jobTitle || 'Position'}`;
     else if (type === 'cover-letter' && companyName) name = `${companyName} - ${jobTitle || 'Role'} Cover Letter`;
     else if (type === 'cover-letter') name = 'Professional Cover Letter';
     else if (type === 'cv' && companyName) name = `${companyName} - ${jobTitle || 'CV'} CV`;
@@ -534,6 +574,7 @@ function AppContent() {
 
     const version: ResumeVersion = {
       id: generateId(), name, timestamp: Date.now(), data, type,
+      documentLayout,
       companyName, companyShortName, jobTitle, atsKeywords: keywords,
       changes, alignmentScore, alignmentDetails, proofMap, model,
     };
@@ -605,7 +646,7 @@ function AppContent() {
       const cleanedResume = cleanResumeData(result.resume);
       setGeneratedResume(cleanedResume); setGeneratedCoverLetter(null); setAtsKeywords([]);
       saveVersion(cleanedResume, 'base', result.companyName, result.companyShortName, result.jobTitle,
-        result.changes, [], undefined, undefined, getModelUsed(), result.proofMap);
+        result.changes, [], undefined, undefined, getModelUsed(), result.proofMap, 'single-page');
       setIsSinglePageMode(true);
       setResumeFormat('classic'); // reset to classic sub-style
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
@@ -639,6 +680,7 @@ function AppContent() {
     setGeneratedCoverLetter(derivedState.generatedCoverLetter);
     setCurrentVersion(derivedState.currentVersion);
     setAtsKeywords(derivedState.atsKeywords);
+    setIsSinglePageMode(isSinglePageResumeVersion(version));
     setActiveTab(derivedState.activeTab);
     setShowChanges(!!(version.changes && version.changes.length > 0));
     setShowProofMap(false); setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
@@ -662,6 +704,7 @@ function AppContent() {
     setGeneratedResume(resolvedState.generatedResume);
     setGeneratedCoverLetter(resolvedState.generatedCoverLetter);
     setAtsKeywords(resolvedState.atsKeywords);
+    setIsSinglePageMode(isSinglePageResumeVersion(resolvedState.currentVersion));
     setActiveTab(resolvedState.activeTab);
     setShowChanges(false); setShowProofMap(false); setShowAgent(false);
   };
@@ -687,6 +730,7 @@ function AppContent() {
     setEditLogs([]); setError(''); setActiveTab('input');
     setShowChanges(false); setShowProofMap(false); setShowAgent(false);
     setShowEditHistory(false); setShowQuickEdit(false); setIsResumeCollapsed(false);
+    setIsSinglePageMode(false);
     removeStorageItem(STORAGE_KEYS.RESUME_DATA);
     removeStorageItem(STORAGE_KEYS.JOB_DESCRIPTION);
     setShowClearConfirm(false);
@@ -807,7 +851,6 @@ function AppContent() {
             </div>
 
             <div className="sidebar-data-section" ref={sidebarDataRef}>
-              <div className="sidebar-fade-mask" />
               <div className={`card collapsible-card sidebar-card ${isResumeCollapsed ? 'collapsed' : ''}`}>
                 <div className="card-header" onClick={() => setIsResumeCollapsed(!isResumeCollapsed)} style={{ cursor: 'pointer' }}>
                   <div className="header-title">
@@ -843,49 +886,47 @@ function AppContent() {
                 )}
               </div>
 
-              {/* ── Last Generated quick-nav ── */}
-              {versions.length > 0 && (() => {
-                const last = versions[0];
-                const typeInfo = (
-                  last.type === 'cover-letter' ? { icon: '✉', label: 'Cover Letter', color: '#c26b2d' }
-                  : last.type === 'tailored'   ? { icon: '✦', label: 'Tailored',     color: '#3b9eff' }
-                  : last.type === 'fixed'       ? { icon: '✓', label: 'Fixed',        color: '#22c55e' }
-                  :                              { icon: '◈', label: 'Resume',         color: '#a78bfa' }
-                );
-                const timeLabel = (() => {
-                  const d = new Date(last.timestamp);
-                  const now = new Date();
-                  const diffMs = now.getTime() - d.getTime();
-                  const diffMin = Math.floor(diffMs / 60000);
-                  if (diffMin < 1)  return 'Just now';
-                  if (diffMin < 60) return `${diffMin}m ago`;
-                  const diffH = Math.floor(diffMin / 60);
-                  if (diffH < 24) return `${diffH}h ago`;
-                  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-                })();
-                return (
-                  <button
-                    key={last.id}
-                    className="sidebar-last-generated"
-                    onClick={() => handleQuickNavToVersion(last)}
-                    title={`Open: ${last.name}`}
-                  >
-                    <div className="slg-left">
-                      <span className="slg-icon" style={{ color: typeInfo.color }}>{typeInfo.icon}</span>
-                      <div className="slg-text">
-                        <span className="slg-label">{typeInfo.label}</span>
-                        <span className="slg-name">{last.name}</span>
-                      </div>
-                    </div>
-                    <div className="slg-right">
-                      <span className="slg-time">{timeLabel}</span>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="slg-arrow">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </div>
-                  </button>
-                );
-              })()}
+              {versions.length > 0 && (
+                <div className="sidebar-doc-history" aria-label="Generated documents">
+                  <div className="sdh-header">
+                    <span>Generated Docs</span>
+                    <button
+                      type="button"
+                      onClick={() => { setShowSettings(false); setShowHome(true); }}
+                    >
+                      View All
+                    </button>
+                  </div>
+                  <div className="sdh-list">
+                    {versions.map(version => {
+                      const typeInfo = getVersionTypeInfo(version);
+                      const isActive = currentVersion?.id === version.id;
+                      return (
+                        <button
+                          key={version.id}
+                          type="button"
+                          className={`sdh-row ${isActive ? 'active' : ''}`}
+                          onClick={() => handleQuickNavToVersion(version)}
+                          title={`Open: ${version.name}`}
+                        >
+                          <span className="sdh-marker" style={{ color: typeInfo.color, borderColor: `${typeInfo.color}66` }}>
+                            {typeInfo.marker}
+                          </span>
+                          <span className="sdh-copy">
+                            <span className="sdh-title">{version.name}</span>
+                            <span className="sdh-meta">
+                              <span>{typeInfo.label}</span>
+                              {version.jobTitle && <span>{version.jobTitle}</span>}
+                              <span>{formatVersionAge(version.timestamp)}</span>
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <div className="sidebar-fade-mask" />
             </div>
 
             {/* ── Sidebar footer with quick provider switcher ── */}

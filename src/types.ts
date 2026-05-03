@@ -99,6 +99,7 @@ export interface ResumeVersion {
   timestamp: number;
   data: ResumeData | CoverLetterData;
   type: 'base' | 'tailored' | 'fixed' | 'cover-letter' | 'cv';
+  documentLayout?: 'standard' | 'single-page';
   companyName?: string;
   companyShortName?: string;
   jobTitle?: string;

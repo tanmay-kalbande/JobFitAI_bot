@@ -185,7 +185,7 @@
 }
 
 .re2-bullets li::before {
-  content: '→';
+  content: '\2192';
   position: absolute;
   left: 0;
   color: #cbd5e1;
