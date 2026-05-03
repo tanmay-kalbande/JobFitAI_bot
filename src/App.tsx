@@ -926,7 +926,6 @@ function AppContent() {
                   </div>
                 </div>
               )}
-              <div className="sidebar-fade-mask" />
             </div>
 
             {/* ── Sidebar footer with quick provider switcher ── */}
