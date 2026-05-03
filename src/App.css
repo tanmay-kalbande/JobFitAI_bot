@@ -1,5 +1,5 @@
-/* ============================================================
-   JOBFIT AI — Fixed Stylesheet
+﻿/* ============================================================
+   JOBFIT AI â€” Fixed Stylesheet
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
@@ -10,8 +10,8 @@
 
 :root {
   --sidebar-w: 280px;
-  --gap: 6px;                   /* ← was 12px — more compact border area */
-  --radius-shell: 14px;         /* ← was 28px — sharper corners */
+  --gap: 6px;                   /* â† was 12px â€” more compact border area */
+  --radius-shell: 14px;         /* â† was 28px â€” sharper corners */
   --c-shell: #161717;
   --c-rail: #161717;
   --c-surface: #121212;
@@ -268,7 +268,7 @@ a { color: inherit; text-decoration: none; }
 
 .sidebar-data-section::-webkit-scrollbar { display: none; }
 
-/* ── Fade mask — bottom gradient that fades as you scroll ── */
+/* â”€â”€ Fade mask â€” bottom gradient that fades as you scroll â”€â”€ */
 .sidebar-fade-mask {
   position: sticky;
   bottom: 0;
@@ -283,7 +283,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 2;
 }
 
-/* ── Last Generated quick-nav card ── */
+/* â”€â”€ Last Generated quick-nav card â”€â”€ */
 .sidebar-last-generated {
   width: 100%;
   display: flex;
@@ -973,7 +973,7 @@ a { color: inherit; text-decoration: none; }
    ============================================================ */
 
 /* ============================================================
-   PREVIEW TOOLBAR — Dark, consistent
+   PREVIEW TOOLBAR â€” Dark, consistent
    Replace everything from .preview-toolbar { ... }
    down through .format-btn.active { ... }
    ============================================================ */
@@ -1028,7 +1028,7 @@ a { color: inherit; text-decoration: none; }
   flex-wrap: wrap;
 }
 
-/* ── Unified button base ── */
+/* â”€â”€ Unified button base â”€â”€ */
 .toolbar-action-btn,
 .changes-btn,
 .btn-download {
@@ -1407,7 +1407,7 @@ a { color: inherit; text-decoration: none; }
 .modal-actions .btn-secondary:hover { border-color: #1a1a2e; }
 
 /* ============================================================
-   SETTINGS — Refined (sm-* namespace)
+   SETTINGS â€” Refined (sm-* namespace)
    ============================================================ */
 
 /* Screen wrapper */
@@ -1439,7 +1439,7 @@ a { color: inherit; text-decoration: none; }
   background: #fff;
 }
 
-/* ── Shared header ── */
+/* â”€â”€ Shared header â”€â”€ */
 .sm-header {
   display: flex;
   align-items: center;
@@ -1482,7 +1482,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.7rem;
 }
 
-/* ── Close button — consistent position top-right in BOTH modes ── */
+/* â”€â”€ Close button â€” consistent position top-right in BOTH modes â”€â”€ */
 .sm-close-btn {
   width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
@@ -1515,7 +1515,7 @@ a { color: inherit; text-decoration: none; }
 /* Form */
 .sm-form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 
-/* ← No scrollbar on sm-scroll in screen mode */
+/* â† No scrollbar on sm-scroll in screen mode */
 .sm-scroll { flex: 1; overflow-y: auto; padding: 0.4rem 0; }
 .sm-modal .sm-scroll { padding: 0.4rem 1.25rem; }
 
@@ -1798,7 +1798,7 @@ a { color: inherit; text-decoration: none; }
 .dropdown-item.active { background: var(--c-raised); color: var(--c-text); }
 
 /* ============================================================
-   RESUME TEMPLATES — CLASSIC
+   RESUME TEMPLATES â€” CLASSIC
    ============================================================ */
 
 .resume-container {
@@ -1863,7 +1863,7 @@ a { color: inherit; text-decoration: none; }
 .resume-container .custom-item { margin-bottom: 6px; color: #374151; }
 
 /* ============================================================
-   RESUME TEMPLATES — MODERN
+   RESUME TEMPLATES â€” MODERN
    ============================================================ */
 
 .resume-modern {
@@ -1894,14 +1894,14 @@ a { color: inherit; text-decoration: none; }
 
 .rm-bullets { list-style: none; padding: 0; margin: 0; }
 .rm-bullets li { font-size: 12px; color: var(--rm-ink2); line-height: 1.7; padding-left: 14px; position: relative; margin-bottom: 4px; font-weight: 300; }
-.rm-bullets li::before { content: '•'; position: absolute; left: 0; color: var(--rm-accent); }
+.rm-bullets li::before { content: 'â€¢'; position: absolute; left: 0; color: var(--rm-accent); }
 
 .rm-project { margin-bottom: 14px; }
 .rm-project:last-child { margin-bottom: 0; }
 .rm-proj-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 2px; }
 .rm-proj-name { font-size: 13px; font-weight: 600; color: var(--rm-ink); }
 .rm-proj-desc { font-size: 12px; color: var(--rm-ink2); line-height: 1.65; padding-left: 14px; position: relative; font-weight: 300; margin-bottom: 2px; }
-.rm-proj-desc::before { content: '•'; position: absolute; left: 0; color: var(--rm-accent); }
+.rm-proj-desc::before { content: 'â€¢'; position: absolute; left: 0; color: var(--rm-accent); }
 .rm-proj-link { font-family: var(--font-mono); font-size: 10px; color: var(--rm-ink2); text-decoration: none; padding-left: 14px; display: inline-block; }
 .rm-proj-link:hover { color: var(--rm-ink); }
 
@@ -2084,7 +2084,7 @@ a { color: inherit; text-decoration: none; }
 .alignment-points.missing .points-label { color: #eab308; }
 
 .point-item { font-size: 0.7rem; color: #4b5563; padding-left: 0.7rem; position: relative; }
-.point-item::before { content: "•"; position: absolute; left: 0; }
+.point-item::before { content: "â€¢"; position: absolute; left: 0; }
 .point-item.matching::before { color: #22c55e; }
 .point-item.missing::before { color: #eab308; }
 
@@ -2140,14 +2140,14 @@ a { color: inherit; text-decoration: none; }
 .analysis-card h3 { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.65rem; color: #4b5563; }
 .analysis-card ul { list-style: none; }
 .analysis-card li { font-size: 0.72rem; color: #6b7280; margin-bottom: 0.45rem; padding-left: 0.9rem; position: relative; line-height: 1.55; }
-.analysis-card li::before { content: "•"; position: absolute; left: 0; color: #9ca3b8; }
+.analysis-card li::before { content: "â€¢"; position: absolute; left: 0; color: #9ca3b8; }
 .strengths li::before { color: #22c55e; }
 .weaknesses li::before { color: #ef4444; }
 
 .improvements-section { background: #f9fafb; padding: 0.9rem; border-radius: var(--radius-sm); border: 1px solid #e8ecf2; }
 .improvements-section h3 { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.65rem; color: #4b5563; }
 .improvements-section li { font-size: 0.72rem; color: #1a1a2e; margin-bottom: 0.45rem; padding-left: 0.9rem; position: relative; }
-.improvements-section li::before { content: "→"; position: absolute; left: 0; color: #9ca3b8; }
+.improvements-section li::before { content: "â†’"; position: absolute; left: 0; color: #9ca3b8; }
 
 .fix-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #e8ecf2; text-align: center; }
 
@@ -2458,7 +2458,7 @@ a { color: inherit; text-decoration: none; }
 
 .agf-plist { list-style: none; padding: 0.45rem 0.7rem; display: flex; flex-direction: column; gap: 0.22rem; }
 .agf-plist li { font-size: 0.68rem; color: #4b5563; padding-left: 0.9rem; position: relative; line-height: 1.5; }
-.agf-plist li::before { content: '›'; position: absolute; left: 0; color: #6366f1; font-weight: 700; font-size: 0.82rem; line-height: 1.3; }
+.agf-plist li::before { content: 'â€º'; position: absolute; left: 0; color: #6366f1; font-weight: 700; font-size: 0.82rem; line-height: 1.3; }
 
 .agf-pbtns { display: flex; gap: 0.35rem; padding: 0.45rem 0.65rem; border-top: 1px solid #e2e5ed; }
 
@@ -2593,7 +2593,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   RESPONSIVE — Tablet (≤ 1120px)
+   RESPONSIVE â€” Tablet (â‰¤ 1120px)
    ============================================================ */
 
 @media (max-width: 1120px) {
@@ -2630,7 +2630,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ============================================================
-   RESPONSIVE — Mobile (≤ 768px)
+   RESPONSIVE â€” Mobile (â‰¤ 768px)
    ============================================================ */
 
 @media (max-width: 768px) {
@@ -2680,7 +2680,7 @@ a { color: inherit; text-decoration: none; }
 .app-footer { display: none; }
 
 /* ============================================================
-   QUICK PROVIDER SWITCHER — .qps-*
+   QUICK PROVIDER SWITCHER â€” .qps-*
    Paste this block at the end of App.css
    ============================================================ */
 
@@ -2938,19 +2938,21 @@ a { color: inherit; text-decoration: none; }
 
 /* ============================================================
    COMPACT (SINGLE-PAGE) RESUME TEMPLATE
+   Screen-first layout â€” only uses mm in @media print
    ============================================================ */
 
 .compact-resume {
   font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 9.5pt;
-  line-height: 1.35;
+  font-size: 13px;
+  line-height: 1.4;
   color: #1a1a1a;
   background: #fff;
-  padding: 18mm 16mm;
-  width: 210mm;
-  max-width: 210mm;
-  min-height: auto;
+  padding: 40px 48px;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
   box-sizing: border-box;
+  border-radius: 12px;
 }
 
 /* Header */
@@ -2958,24 +2960,24 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 6pt;
-  gap: 12pt;
+  margin-bottom: 10px;
+  gap: 16px;
 }
 
 .compact-name-block { flex: 1; }
 
 .compact-name {
-  font-size: 18pt;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #111;
   line-height: 1.1;
   font-family: 'Georgia', serif;
-  margin: 0 0 2pt 0;
+  margin: 0 0 4px 0;
 }
 
 .compact-title {
-  font-size: 9pt;
+  font-size: 13px;
   color: #555;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -2983,13 +2985,13 @@ a { color: inherit; text-decoration: none; }
 
 .compact-contact {
   text-align: right;
-  font-size: 8pt;
+  font-size: 11.5px;
   color: #444;
   line-height: 1.6;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 1pt;
+  gap: 2px;
   flex-shrink: 0;
   max-width: 46%;
 }
@@ -3001,16 +3003,16 @@ a { color: inherit; text-decoration: none; }
 
 .compact-rule {
   border: none;
-  border-top: 1.5pt solid #1a1a1a;
-  margin: 5pt 0 7pt 0;
+  border-top: 2px solid #1a1a1a;
+  margin: 8px 0 12px 0;
 }
 
 /* Summary */
 .compact-summary {
-  font-size: 8.5pt;
+  font-size: 12.5px;
   color: #333;
-  line-height: 1.45;
-  margin-bottom: 8pt;
+  line-height: 1.5;
+  margin-bottom: 14px;
   font-style: italic;
 }
 
@@ -3018,56 +3020,56 @@ a { color: inherit; text-decoration: none; }
 .compact-body {
   display: grid;
   grid-template-columns: 1fr 36%;
-  gap: 0 14pt;
+  gap: 0 20px;
 }
 
 /* Sections */
 .compact-section {
-  margin-bottom: 9pt;
+  margin-bottom: 14px;
 }
 
 .compact-section-title {
-  font-size: 7.5pt;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: #111;
-  border-bottom: 0.75pt solid #ccc;
-  padding-bottom: 2pt;
-  margin-bottom: 4pt;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 3px;
+  margin-bottom: 8px;
   font-family: 'Georgia', serif;
 }
 
 /* Experience */
 .compact-exp-item {
-  margin-bottom: 6pt;
+  margin-bottom: 10px;
 }
 
 .compact-exp-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 4pt;
+  gap: 8px;
 }
 
 .compact-job-title {
   font-weight: 700;
-  font-size: 9pt;
+  font-size: 13px;
   color: #111;
 }
 
 .compact-duration {
-  font-size: 7.5pt;
+  font-size: 11px;
   color: #666;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .compact-company {
-  font-size: 8pt;
+  font-size: 12px;
   color: #444;
   font-style: italic;
-  margin-bottom: 2pt;
+  margin-bottom: 3px;
 }
 
 .compact-duties {
@@ -3077,28 +3079,28 @@ a { color: inherit; text-decoration: none; }
 }
 
 .compact-duties li {
-  font-size: 8.5pt;
+  font-size: 12.5px;
   color: #222;
-  padding-left: 8pt;
+  padding-left: 14px;
   position: relative;
-  margin-bottom: 1.5pt;
-  line-height: 1.35;
+  margin-bottom: 3px;
+  line-height: 1.4;
 }
 
 .compact-duties li::before {
-  content: '▸';
+  content: 'â–¸';
   position: absolute;
   left: 0;
   color: #666;
-  font-size: 7pt;
-  top: 1pt;
+  font-size: 10px;
+  top: 2px;
 }
 
 /* Projects */
 .compact-project-item {
-  font-size: 8.5pt;
-  margin-bottom: 3pt;
-  line-height: 1.35;
+  font-size: 12.5px;
+  margin-bottom: 5px;
+  line-height: 1.4;
 }
 
 .compact-proj-title {
@@ -3115,18 +3117,18 @@ a { color: inherit; text-decoration: none; }
   color: #333;
 }
 
-/* Sidebar — Skills, Education, Certs */
+/* Sidebar â€” Skills, Education, Certs */
 .compact-sidebar {}
 
 .compact-skills {
   display: flex;
   flex-direction: column;
-  gap: 2pt;
+  gap: 4px;
 }
 
 .compact-skill-row {
-  font-size: 8pt;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.35;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -3135,42 +3137,42 @@ a { color: inherit; text-decoration: none; }
 .compact-skill-cat {
   font-weight: 700;
   color: #333;
-  font-size: 7.5pt;
+  font-size: 10.5px;
 }
 
 .compact-skill-val {
   color: #444;
-  font-size: 8pt;
+  font-size: 12px;
 }
 
 /* Education */
 .compact-edu-item {
-  margin-bottom: 5pt;
+  margin-bottom: 8px;
 }
 
 .compact-degree {
   font-weight: 700;
-  font-size: 8.5pt;
+  font-size: 12.5px;
   color: #111;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .compact-institution {
-  font-size: 8pt;
+  font-size: 11.5px;
   color: #444;
   font-style: italic;
 }
 
 .compact-year {
-  font-size: 7.5pt;
+  font-size: 10.5px;
   color: #666;
 }
 
 /* Certifications */
 .compact-cert-item {
-  margin-bottom: 3pt;
-  font-size: 7.5pt;
-  line-height: 1.35;
+  margin-bottom: 5px;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .compact-cert-name {
@@ -3184,31 +3186,51 @@ a { color: inherit; text-decoration: none; }
   font-style: italic;
 }
 
-/* Print — enforce single page */
+/* â”€â”€ Print â€” enforce single page â”€â”€ */
 @media print {
   .compact-resume {
-    padding: 15mm 13mm;
+    padding: 14mm 16mm;
     width: 210mm;
+    max-width: 210mm;
     max-height: 297mm;
     overflow: hidden;
     font-size: 9pt;
+    border-radius: 0;
+    margin: 0;
   }
 
   .compact-name { font-size: 16pt; }
+  .compact-section-title { font-size: 7.5pt; }
+  .compact-job-title { font-size: 9pt; }
+  .compact-duties li { font-size: 8.5pt; }
+  .compact-company { font-size: 8pt; }
+  .compact-duration { font-size: 7.5pt; }
+  .compact-summary { font-size: 8.5pt; }
+  .compact-contact { font-size: 8pt; }
+  .compact-title { font-size: 8.5pt; }
+  .compact-skill-cat { font-size: 7pt; }
+  .compact-skill-val { font-size: 8pt; }
+  .compact-degree { font-size: 8.5pt; }
+  .compact-institution { font-size: 8pt; }
+  .compact-year { font-size: 7.5pt; }
+  .compact-cert-item { font-size: 7.5pt; }
+  .compact-project-item { font-size: 8.5pt; }
+  .compact-body { gap: 0 14pt; }
+  .compact-section { margin-bottom: 8pt; }
+  .compact-exp-item { margin-bottom: 6pt; }
 }
 
 /* ============================================================
-   COMPACT VARIANT — CLASSIC (default, no extra overrides needed)
+   COMPACT VARIANT â€” CLASSIC (default â€” serif, traditional)
+   Already the base .compact-resume styles above
    ============================================================ */
-/* Already defined above as the base .compact-resume styles */
 
 /* ============================================================
-   COMPACT VARIANT — MODERN
+   COMPACT VARIANT â€” MODERN (sans-serif, blue accent, panel sidebar)
    ============================================================ */
 
 .compact-modern {
-  font-family: 'DM Sans', 'Inter', sans-serif;
-  font-size: 9.5pt;
+  font-family: 'DM Sans', 'Inter', -apple-system, sans-serif;
   color: #1e1e2e;
 }
 
@@ -3223,19 +3245,17 @@ a { color: inherit; text-decoration: none; }
   color: #0d6efd;
   font-style: normal;
   font-weight: 600;
-  font-size: 8.5pt;
 }
 
 .compact-modern .compact-rule {
-  border-top: 2pt solid #0d6efd;
+  border-top: 2.5px solid #0d6efd;
 }
 
 .compact-modern .compact-section-title {
   font-family: 'DM Sans', 'Inter', sans-serif;
   color: #0d6efd;
   border-bottom-color: #0d6efd;
-  border-bottom-width: 1pt;
-  font-size: 7pt;
+  border-bottom-width: 1.5px;
   letter-spacing: 0.15em;
 }
 
@@ -3246,34 +3266,34 @@ a { color: inherit; text-decoration: none; }
 
 .compact-modern .compact-sidebar {
   background: #f0f4ff;
-  border-radius: 6pt;
-  padding: 8pt 9pt;
-  margin: -4pt -6pt;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: -6px -8px;
 }
 
 .compact-modern .compact-skill-cat {
   color: #0d6efd;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 6.5pt;
+  font-size: 9.5px;
   letter-spacing: 0.08em;
 }
 
 .compact-modern .compact-duties li::before {
-  content: '→';
+  content: 'â†’';
   color: #0d6efd;
+  font-size: 11px;
 }
 
 .compact-modern .compact-contact a { color: #0d6efd; }
 .compact-modern .compact-proj-title a { color: #0d6efd; }
 
 /* ============================================================
-   COMPACT VARIANT — EXECUTIVE
+   COMPACT VARIANT â€” EXECUTIVE (serif, double-rule, small-caps)
    ============================================================ */
 
 .compact-executive {
   font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 9.5pt;
   color: #1a1a1a;
 }
 
@@ -3282,21 +3302,21 @@ a { color: inherit; text-decoration: none; }
   padding-bottom: 0;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4pt;
+  gap: 6px;
 }
 
 .compact-executive .compact-name-block {
   width: 100%;
-  border-bottom: 2.5pt double #1a1a1a;
-  padding-bottom: 4pt;
-  margin-bottom: 3pt;
+  border-bottom: 3px double #1a1a1a;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
   display: flex;
   align-items: baseline;
-  gap: 16pt;
+  gap: 20px;
 }
 
 .compact-executive .compact-name {
-  font-size: 20pt;
+  font-size: 28px;
   letter-spacing: 0.06em;
   color: #111;
   font-weight: 700;
@@ -3304,7 +3324,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .compact-executive .compact-title {
-  font-size: 9pt;
+  font-size: 13px;
   color: #444;
   font-style: normal;
   font-variant: small-caps;
@@ -3317,46 +3337,43 @@ a { color: inherit; text-decoration: none; }
   text-align: left;
   align-items: flex-start;
   max-width: 100%;
-  column-gap: 14pt;
+  column-gap: 18px;
   row-gap: 0;
-  font-size: 7.5pt;
+  font-size: 11px;
   color: #555;
 }
 
 .compact-executive .compact-rule {
-  border-top: 1pt solid #888;
-  margin: 4pt 0 6pt 0;
+  border-top: 1px solid #888;
+  margin: 6px 0 10px 0;
 }
 
 .compact-executive .compact-summary {
   font-style: normal;
-  font-size: 8.5pt;
-  color: #222;
-  border-left: 2.5pt solid #1a1a1a;
-  padding-left: 8pt;
-  margin-bottom: 8pt;
+  border-left: 3px solid #1a1a1a;
+  padding-left: 12px;
+  margin-bottom: 14px;
 }
 
 .compact-executive .compact-section-title {
   font-family: 'Georgia', serif;
-  font-size: 7.5pt;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #333;
-  border-bottom: 0.5pt solid #999;
+  border-bottom: 1px solid #999;
 }
 
 .compact-executive .compact-job-title {
   font-variant: small-caps;
   letter-spacing: 0.04em;
-  font-size: 9.5pt;
+  font-size: 14px;
 }
 
 .compact-executive .compact-duties li::before {
-  content: '■';
-  font-size: 5pt;
-  top: 3pt;
+  content: 'â– ';
+  font-size: 7px;
+  top: 4px;
   color: #333;
 }
 
@@ -3368,3 +3385,4 @@ a { color: inherit; text-decoration: none; }
 
 .compact-executive .compact-contact a { color: #222; text-decoration: underline; }
 .compact-executive .compact-proj-title a { color: #222; text-decoration: underline; }
+

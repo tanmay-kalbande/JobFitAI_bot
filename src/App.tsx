@@ -368,15 +368,6 @@ function AppContent() {
   // Sidebar scroll ref (for fade mask)
   const sidebarDataRef = useRef<HTMLDivElement>(null);
 
-  // Quick-nav: jump to a version in the preview panel with smooth scroll
-  const handleQuickNavToVersion = useCallback((version: ResumeVersion) => {
-    handleSelectVersion(version);
-    setActiveTab('preview');
-    requestAnimationFrame(() => {
-      const el = document.getElementById('resume-cv-content');
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }, [handleSelectVersion, setActiveTab]);
 
   useEffect(() => {
     if (!showQuickProvider) return;
@@ -652,6 +643,16 @@ function AppContent() {
     setShowChanges(!!(version.changes && version.changes.length > 0));
     setShowProofMap(false); setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
     setEditLogs([]);
+  };
+
+  // Quick-nav: jump to a version in the preview panel with smooth scroll
+  const handleQuickNavToVersion = (version: ResumeVersion) => {
+    handleSelectVersion(version);
+    setActiveTab('preview');
+    requestAnimationFrame(() => {
+      const el = document.getElementById('resume-cv-content');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const handleDeleteVersion = (id: string) => {
