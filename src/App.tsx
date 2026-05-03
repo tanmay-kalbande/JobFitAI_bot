@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { ResumeData, CoverLetterData, AISettings, ResumeVersion, ResumeFormat, ResumeEditLog } from './types';
+import { Analytics } from '@vercel/analytics/react';
 import {
   DEFAULT_SETTINGS, generateId, APP_CONSTANTS,
   GOOGLE_MODELS, CEREBRAS_MODELS, MISTRAL_MODELS, GROQ_MODELS,
@@ -1251,6 +1252,7 @@ export default function AppWithErrorBoundary() {
       <AppProviders>
         <AppContent />
       </AppProviders>
+      <Analytics />
     </ErrorBoundary>
   );
 }
