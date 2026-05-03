@@ -83,7 +83,7 @@ function normalizeVersionType(type: string | undefined): ResumeVersion['type'] {
 }
 
 function normalizeResumeFormat(value: unknown): ResumeFormat {
-  return value === 'modern' ? 'modern' : value === 'executive' ? 'executive' : 'classic';
+  return value === 'modern' ? 'modern' : value === 'executive' ? 'executive' : value === 'compact' ? 'compact' : 'classic';
 }
 
 function normalizeActiveTab(value: unknown): AppTab {

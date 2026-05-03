@@ -83,7 +83,7 @@ export interface CoverLetterData {
 
 export type AIProvider = 'google' | 'cerebras' | 'mistral' | 'groq' | 'sambanova' | 'zai' | 'openrouter';
 
-export type ResumeFormat = 'classic' | 'modern' | 'executive';
+export type ResumeFormat = 'classic' | 'modern' | 'executive' | 'compact';
 
 export interface ProofMapItem {
   requirement: string;

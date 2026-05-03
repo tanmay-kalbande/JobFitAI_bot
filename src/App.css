@@ -2821,3 +2821,264 @@ a { color: inherit; text-decoration: none; }
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ============================================================
+   COMPACT (SINGLE-PAGE) RESUME TEMPLATE
+   ============================================================ */
+
+.compact-resume {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 9.5pt;
+  line-height: 1.35;
+  color: #1a1a1a;
+  background: #fff;
+  padding: 18mm 16mm;
+  width: 210mm;
+  max-width: 210mm;
+  min-height: auto;
+  box-sizing: border-box;
+}
+
+/* Header */
+.compact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6pt;
+  gap: 12pt;
+}
+
+.compact-name-block { flex: 1; }
+
+.compact-name {
+  font-size: 18pt;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #111;
+  line-height: 1.1;
+  font-family: 'Georgia', serif;
+  margin: 0 0 2pt 0;
+}
+
+.compact-title {
+  font-size: 9pt;
+  color: #555;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.compact-contact {
+  text-align: right;
+  font-size: 8pt;
+  color: #444;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1pt;
+  flex-shrink: 0;
+  max-width: 46%;
+}
+
+.compact-contact a {
+  color: #1a56db;
+  text-decoration: none;
+}
+
+.compact-rule {
+  border: none;
+  border-top: 1.5pt solid #1a1a1a;
+  margin: 5pt 0 7pt 0;
+}
+
+/* Summary */
+.compact-summary {
+  font-size: 8.5pt;
+  color: #333;
+  line-height: 1.45;
+  margin-bottom: 8pt;
+  font-style: italic;
+}
+
+/* Two-column body */
+.compact-body {
+  display: grid;
+  grid-template-columns: 1fr 36%;
+  gap: 0 14pt;
+}
+
+/* Sections */
+.compact-section {
+  margin-bottom: 9pt;
+}
+
+.compact-section-title {
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #111;
+  border-bottom: 0.75pt solid #ccc;
+  padding-bottom: 2pt;
+  margin-bottom: 4pt;
+  font-family: 'Georgia', serif;
+}
+
+/* Experience */
+.compact-exp-item {
+  margin-bottom: 6pt;
+}
+
+.compact-exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4pt;
+}
+
+.compact-job-title {
+  font-weight: 700;
+  font-size: 9pt;
+  color: #111;
+}
+
+.compact-duration {
+  font-size: 7.5pt;
+  color: #666;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.compact-company {
+  font-size: 8pt;
+  color: #444;
+  font-style: italic;
+  margin-bottom: 2pt;
+}
+
+.compact-duties {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.compact-duties li {
+  font-size: 8.5pt;
+  color: #222;
+  padding-left: 8pt;
+  position: relative;
+  margin-bottom: 1.5pt;
+  line-height: 1.35;
+}
+
+.compact-duties li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #666;
+  font-size: 7pt;
+  top: 1pt;
+}
+
+/* Projects */
+.compact-project-item {
+  font-size: 8.5pt;
+  margin-bottom: 3pt;
+  line-height: 1.35;
+}
+
+.compact-proj-title {
+  font-weight: 700;
+  color: #111;
+}
+
+.compact-proj-title a {
+  color: #1a56db;
+  text-decoration: none;
+}
+
+.compact-proj-desc {
+  color: #333;
+}
+
+/* Sidebar — Skills, Education, Certs */
+.compact-sidebar {}
+
+.compact-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 2pt;
+}
+
+.compact-skill-row {
+  font-size: 8pt;
+  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.compact-skill-cat {
+  font-weight: 700;
+  color: #333;
+  font-size: 7.5pt;
+}
+
+.compact-skill-val {
+  color: #444;
+  font-size: 8pt;
+}
+
+/* Education */
+.compact-edu-item {
+  margin-bottom: 5pt;
+}
+
+.compact-degree {
+  font-weight: 700;
+  font-size: 8.5pt;
+  color: #111;
+  line-height: 1.2;
+}
+
+.compact-institution {
+  font-size: 8pt;
+  color: #444;
+  font-style: italic;
+}
+
+.compact-year {
+  font-size: 7.5pt;
+  color: #666;
+}
+
+/* Certifications */
+.compact-cert-item {
+  margin-bottom: 3pt;
+  font-size: 7.5pt;
+  line-height: 1.35;
+}
+
+.compact-cert-name {
+  font-weight: 700;
+  color: #111;
+  display: block;
+}
+
+.compact-cert-meta {
+  color: #555;
+  font-style: italic;
+}
+
+/* Print — enforce single page */
+@media print {
+  .compact-resume {
+    padding: 15mm 13mm;
+    width: 210mm;
+    max-height: 297mm;
+    overflow: hidden;
+    font-size: 9pt;
+  }
+
+  .compact-name { font-size: 16pt; }
+}

@@ -818,6 +818,111 @@ Return ONLY the JSON object, nothing else.`;
     }
 }
 
+export interface GeneratedSinglePageResult {
+    resume: ResumeData;
+    changes: string[];
+    companyName: string;
+    companyShortName?: string;
+    jobTitle: string;
+    proofMap: ProofMapItem[];
+}
+
+export async function generateSinglePageResume(
+    resumeData: string,
+    jobDescription: string,
+    settings: AISettings
+): Promise<GeneratedSinglePageResult> {
+    const prompt = `You are a ruthlessly concise resume editor. Your job is to condense the given resume into a strict one-page format that still lands interviews.
+
+TASK: Return a JSON object following this EXACT schema:
+{
+  "companyName": "string — extract from JD if available, otherwise 'General'",
+  "companyShortName": "string — 3-letter uppercase abbreviation. Use 'GEN' if no company",
+  "jobTitle": "string — extract from JD if available, otherwise 'Professional Profile'",
+  "proofMap": [
+    {
+      "requirement": "specific job requirement or theme",
+      "evidence": "best supporting evidence from the resume",
+      "sourceSection": "Summary | Experience | Skills | Projects | Education | Certifications",
+      "strength": "strong | moderate | gap",
+      "reasoning": "1 sentence explanation"
+    }
+  ],
+  "changes": ["string — what was cut and why"],
+  "resume": {
+    "fullName": "string",
+    "title": "string",
+    "email": "string",
+    "phone": "string",
+    "linkedin": "string",
+    "github": "string",
+    "portfolio": "string",
+    "location": "string",
+    "summary": "string — 2 sentences MAX. Role + top 2 skills + strongest result. No filler.",
+    "education": [{ "degree": "string", "institution": "string", "year": "string", "details": "" }],
+    "customSections": [],
+    "experiences": [
+      { "jobTitle": "string", "company": "string", "duration": "string", "duties": ["3 bullets MAX per job — each under 100 chars — action verb + outcome"] }
+    ],
+    "skills": { "category": "comma-separated — keep only the top skills for this role, max 5 per category" },
+    "projects": [{ "title": "string", "description": "string — 1 sentence max", "url": "string" }],
+    "certifications": ["string — top 3 only, format: Name | Issuer · Date"]
+  }
+}
+
+CONDENSING RULES (follow strictly):
+1. Summary: 2 sentences only. Lead with years of experience + domain. End with #1 achievement with a number.
+2. Experience: keep the 3 most recent/relevant jobs only. Each job: 3 bullets maximum. Each bullet: under 100 characters. Start with a strong action verb. Include one number per bullet where the source data has it.
+3. Skills: only list skills that appear in or are directly relevant to the job description (or top 5 per category if no JD). Skip generic soft skills.
+4. Projects: keep 2 most relevant. Description = 1 sentence.
+5. Certifications: top 3 only.
+6. Education: keep all but strip "details" field (set to "").
+7. customSections: always return empty array [].
+8. NEVER invent facts. All content must come from the source resume.
+9. If a JD is provided, bias all choices toward JD-relevant content.
+10. Return ONLY valid JSON.
+
+INPUTS:
+
+Resume Data:
+${resumeData}
+
+Job Description:
+${jobDescription || 'No job description provided. Condense to show the candidate\'s top experience and skills.'}
+
+Return ONLY the JSON object, nothing else.`;
+
+    const response = await callAI(prompt, settings);
+    const jsonStr = extractJSON(response);
+
+    try {
+        const result = parseJSONResponse<{
+            resume: ResumeData;
+            changes?: string[];
+            companyName?: string;
+            companyShortName?: string;
+            jobTitle?: string;
+            proofMap?: unknown;
+        }>(response);
+
+        const resume = result.resume;
+        if (!resume.education) resume.education = [];
+        if (!resume.customSections) resume.customSections = [];
+
+        return {
+            resume,
+            changes: result.changes || [],
+            companyName: result.companyName || 'General',
+            companyShortName: result.companyShortName,
+            jobTitle: result.jobTitle || 'Professional Profile',
+            proofMap: normalizeProofMap(result.proofMap),
+        };
+    } catch {
+        console.error('Failed to parse single-page resume JSON:', jsonStr);
+        throw new Error('Failed to generate single-page resume. Please try again.');
+    }
+}
+
 export async function generateCV(
     resumeData: string,
     jobDescription: string,

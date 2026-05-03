@@ -7,7 +7,7 @@ import {
   SAMBANOVA_MODELS, ZAI_MODELS, OPENROUTER_MODELS,
   PROVIDER_MODELS_MAP, PROVIDER_MODEL_KEY, PROVIDER_META,
 } from './types';
-import { generateBaseResume, generateTailoredResume, generateCoverLetter, generateCV, extractATSKeywords } from './services/aiService';
+import { generateBaseResume, generateTailoredResume, generateCoverLetter, generateSinglePageResume, extractATSKeywords } from './services/aiService';
 import { ResumeTemplate } from './components/ResumeTemplate';
 import { ResumeTemplateModern } from './components/ResumeTemplateModern';
 import { ResumeTemplateExecutive } from './components/ResumeTemplateExecutive';
@@ -28,6 +28,7 @@ import { QuickEditModal } from './components/QuickEditModal';
 import { EditHistoryPanel } from './components/EditHistoryPanel';
 import { HomeModal } from './components/HomeModal';
 import { AIAgentPanel } from './components/AIAgentPanel';
+import { ResumeTemplateCompact } from './components/ResumeTemplateCompact';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useMobileKeyboardGuard } from './hooks/useMobileKeyboardGuard';
 import { useDebounce } from './hooks/useDebounce';
@@ -588,20 +589,21 @@ function AppContent() {
     } finally { finishLoadingRequest(); }
   };
 
-  const handleGenerateCV = async () => {
+  const handleGenerateSinglePage = async () => {
     if (!resumeInput.trim()) { setError('Please enter your resume information'); return; }
     if (!validateSettings()) return;
-    if (!beginLoadingRequest(jobDescription.trim() ? 'Building your detailed CV...' : 'Building your CV...')) return;
+    if (!beginLoadingRequest('Condensing your resume to one page...')) return;
     try {
-      const result = await generateCV(resumeInput, jobDescription, settings);
-      const cleanedCv = cleanResumeData(result.cv);
-      setGeneratedResume(cleanedCv); setGeneratedCoverLetter(null); setAtsKeywords([]);
-      saveVersion(cleanedCv, 'cv', result.companyName, result.companyShortName, result.jobTitle,
+      const result = await generateSinglePageResume(resumeInput, jobDescription, settings);
+      const cleanedResume = cleanResumeData(result.resume);
+      setGeneratedResume(cleanedResume); setGeneratedCoverLetter(null); setAtsKeywords([]);
+      saveVersion(cleanedResume, 'base', result.companyName, result.companyShortName, result.jobTitle,
         result.changes, [], undefined, undefined, getModelUsed(), result.proofMap);
+      setResumeFormat('compact');
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
       setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate CV');
+      setError(err instanceof Error ? err.message : 'Failed to generate single-page resume');
     } finally { finishLoadingRequest(); }
   };
 
@@ -964,11 +966,11 @@ function AppContent() {
                         <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>Tailor for Job</>
                       )}
                     </button>
-                    <button className="btn-outline" onClick={handleGenerateCV} disabled={isLoading}>
-                      {isLoading && loadingMessage.toLowerCase().includes('cv') ? (
-                        <><span className="spinner-small" />Building CV...</>
+                    <button className="btn-outline" onClick={handleGenerateSinglePage} disabled={isLoading}>
+                      {isLoading && loadingMessage.toLowerCase().includes('condensing') ? (
+                        <><span className="spinner-small" />Condensing...</>
                       ) : (
-                        <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" /><path d="M8 13h8" /><path d="M8 17h6" /></svg>Generate CV</>
+                        <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /></svg>Single Page</>
                       )}
                     </button>
                     <button className="btn-outline btn-cover-letter" onClick={handleGenerateCoverLetter} disabled={isLoading}>
@@ -1015,6 +1017,7 @@ function AppContent() {
                             <button className={`format-btn ${resumeFormat === 'classic' ? 'active' : ''}`} onClick={() => setResumeFormat('classic')}>Classic</button>
                             <button className={`format-btn ${resumeFormat === 'modern' ? 'active' : ''}`} onClick={() => setResumeFormat('modern')}>Modern</button>
                             <button className={`format-btn ${resumeFormat === 'executive' ? 'active' : ''}`} onClick={() => setResumeFormat('executive')}>Executive</button>
+                            <button className={`format-btn ${resumeFormat === 'compact' ? 'active' : ''}`} onClick={() => setResumeFormat('compact')} title="Single-page compact layout">1-Page</button>
                           </div>
                         </div>
                       </div>
@@ -1071,10 +1074,8 @@ function AppContent() {
                               resumeFormat === 'executive' ? <CoverLetterTemplateExecutive data={generatedCoverLetter} />
                               : resumeFormat === 'modern' ? <CoverLetterTemplateModern data={generatedCoverLetter} />
                               : <CoverLetterTemplate data={generatedCoverLetter} />
-                            ) : currentVersion?.type === 'cv' && generatedResume ? (
-                              resumeFormat === 'executive' ? <CVTemplateExecutive data={generatedResume} />
-                              : resumeFormat === 'modern' ? <CVTemplateModern data={generatedResume} />
-                              : <CVTemplate data={generatedResume} />
+                            ) : resumeFormat === 'compact' && generatedResume ? (
+                              <ResumeTemplateCompact data={generatedResume} />
                             ) : resumeFormat === 'executive' ? <ResumeTemplateExecutive data={generatedResume!} />
                               : resumeFormat === 'modern' ? <ResumeTemplateModern data={generatedResume!} />
                               : <ResumeTemplate data={generatedResume!} />
