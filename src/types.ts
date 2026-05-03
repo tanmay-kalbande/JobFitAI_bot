@@ -201,6 +201,7 @@ export const ZAI_MODELS = [
 ];
 
 export const OPENROUTER_MODELS = [
+  { value: 'openrouter/owl-alpha',                   label: 'Owl Alpha' },
   { value: 'minimax/minimax-m2.5:free',              label: 'MiniMax M2.5 Free' },
   { value: 'stepfun/step-3.5-flash:free',            label: 'Step 3.5 Flash Free' },
   { value: 'qwen/qwen3.6-plus-preview:free',         label: 'Qwen 3.6 Plus Preview Free' },

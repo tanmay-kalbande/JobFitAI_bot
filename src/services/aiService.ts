@@ -945,9 +945,9 @@ export async function generateCoverLetter(
         year: 'numeric',
     });
 
-    const prompt = `You are a persuasive cover letter writer who crafts letters that get interviews. You write like a professional storyteller — every paragraph has a purpose, every sentence earns its place.
+    const prompt = `You are a concise, sharp cover letter writer. You write like a real human professional — direct, confident, never wordy.
 
-TASK: Create a compelling, one-page cover letter. Return a JSON object with this EXACT schema:
+TASK: Write a SHORT cover letter (250-300 words total body). Return a JSON object with this EXACT schema:
 {
   "companyName": "string — extract from JD if available, otherwise 'Company'",
   "companyShortName": "string — smart 3-letter uppercase abbreviation. Use 'GEN' if no company",
@@ -961,7 +961,7 @@ TASK: Create a compelling, one-page cover letter. Return a JSON object with this
       "reasoning": "1-2 sentence explanation of match quality"
     }
   ],
-  "changes": ["string — describe each key angle or strategy used in the letter"],
+  "changes": ["string — each key strategy or angle used in the letter"],
   "coverLetter": {
     "fullName": "string",
     "title": "string",
@@ -972,45 +972,32 @@ TASK: Create a compelling, one-page cover letter. Return a JSON object with this
     "location": "string",
     "date": "${today}",
     "recipientName": "string — use 'Hiring Manager' if name not provided",
-    "recipientTitle": "string — use hiring team or department if available, else company name",
+    "recipientTitle": "string — use department or company name",
     "companyName": "string",
-    "companyLocation": "string (if unavailable, empty string)",
-    "subject": "string — professional subject line that names the role",
+    "companyLocation": "string (empty if unavailable)",
+    "subject": "string — concise subject line naming the role",
     "greeting": "string",
-    "opening": "string — the HOOK paragraph (see narrative arc below)",
-    "body": ["string — EVIDENCE paragraph", "string — FIT paragraph", "string — optional DEPTH paragraph"],
-    "closing": "string — the ASK paragraph (see narrative arc below)",
+    "opening": "string — 2 sentences max. Lead with a specific, relevant achievement or direct connection to the role. NO 'I am writing to apply' openers.",
+    "body": [
+      "string — EVIDENCE: 2-3 sentences with the 1-2 strongest proof points (use concrete numbers/outcomes from the resume).",
+      "string — FIT: 2 sentences on why this specific company/role, not a generic statement."
+    ],
+    "closing": "string — 1-2 sentences. Confident ask, mention availability.",
     "signoff": "string",
     "signatureName": "string"
   }
 }
 
-NARRATIVE ARC — Every great cover letter follows this structure:
-
-1. HOOK (opening): Open with a specific, attention-grabbing statement that connects the candidate to the role. Reference the company by name and the specific position. Avoid generic openers like "I am writing to apply for..." — instead, lead with a compelling insight, a shared value, or the candidate's most relevant achievement. Example: "When I saw [Company]'s posting for [Role], I recognized the exact intersection of [skill] and [domain] that I've spent the past [X] years building."
-
-2. EVIDENCE (body paragraph 1): Present the 2-3 strongest proof points from the resume that directly map to the JD's top requirements. Use specific numbers, project names, and outcomes. This paragraph answers: "Why should they believe I can do this job?"
-
-3. FIT (body paragraph 2): Explain why THIS company, not just any company. Reference specific details from the JD — team structure, mission, tech stack, product, or values. Connect the candidate's trajectory to the company's direction. This paragraph answers: "Why do I want THIS role at THIS company?"
-
-4. DEPTH (body paragraph 3, optional): If the candidate has a unique angle — an unusual background, a passion project, domain expertise, or a recent achievement — this is where it goes. Only include if it adds genuine value.
-
-5. ASK (closing): Confident, forward-looking close. Express enthusiasm for discussing the role further. Mention availability. End with energy, not passivity.
-
-TONE & STYLE:
-• Conversational but professional — write like a confident peer, not a supplicant.
-• Active voice throughout. No passive constructions.
-• Specific over generic — "reduced data pipeline latency by 40%" beats "improved system performance."
-• Avoid clichés: "passionate," "team player," "go-getter," "hard-working" — replace with evidence.
-• Each paragraph should be 3-5 sentences. The full letter should be readable in under 60 seconds.
-
-CRITICAL RULES:
-1. NEVER invent facts — all claims must come from the source resume data.
-2. Do NOT format as a resume or use bullet lists. This is a flowing letter.
-3. The "body" array should contain 2-3 paragraphs (Evidence, Fit, and optionally Depth).
-4. If the JD mentions a requirement the candidate lacks, acknowledge adjacent skills or transferable experience honestly — never pretend direct experience exists.
-5. The "proofMap" should contain 4-7 key JD requirements mapped to evidence or gaps.
-6. Return ONLY valid JSON.
+RULES:
+• Opening: 2 sentences max. Skip "I am excited/passionate/writing to apply" — start with what you've done or a sharp observation.
+• Body: max 2 paragraphs. Evidence paragraph: 1-2 real proof points with numbers. Fit paragraph: why this role/company specifically.
+• Closing: 1-2 sentences only. No rambling.
+• Total body (opening + body + closing): 250-300 words. If it's longer, cut it.
+• BANNED words/phrases: passionate, excited to apply, team player, hard-working, go-getter, I am writing to apply, it would be my pleasure, I believe I would be a great fit.
+• Never invent facts — all claims must be grounded in the resume data.
+• No bullet lists inside paragraphs. Flowing prose only.
+• The "proofMap" should have 4-6 JD requirements mapped to evidence or gaps.
+• Return ONLY valid JSON.
 
 INPUTS:
 
@@ -1018,7 +1005,7 @@ Resume Data:
 ${resumeData}
 
 Job Description:
-${jobDescription || 'No job description provided. Create a strong general-purpose cover letter that highlights the candidate\'s best qualities.'}
+${jobDescription || 'No job description provided. Write a strong general-purpose cover letter showcasing the candidate\'s top 2-3 skills with real examples.'}
 
 Return ONLY the JSON object, nothing else.`;
 
