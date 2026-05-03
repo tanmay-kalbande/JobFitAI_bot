@@ -263,9 +263,123 @@ a { color: inherit; text-decoration: none; }
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: none;
+  position: relative; /* needed for fade mask positioning */
 }
 
 .sidebar-data-section::-webkit-scrollbar { display: none; }
+
+/* ── Fade mask — bottom gradient that fades as you scroll ── */
+.sidebar-fade-mask {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: linear-gradient(to top, #161717 35%, transparent);
+  pointer-events: none;
+  margin-top: auto;
+  flex-shrink: 0;
+  order: 999; /* always last visually */
+  z-index: 2;
+}
+
+/* ── Last Generated quick-nav card ── */
+.sidebar-last-generated {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  text-align: left;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+  animation: slgFadeIn 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+.sidebar-last-generated:hover {
+  background: var(--c-raised);
+  border-color: var(--c-border-s);
+  transform: translateX(2px);
+}
+
+.sidebar-last-generated:hover .slg-arrow {
+  transform: translateX(2px);
+  opacity: 1;
+}
+
+@keyframes slgFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.slg-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.slg-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  line-height: 1;
+}
+
+.slg-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.slg-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--c-muted);
+  font-family: var(--font-mono);
+}
+
+.slg-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--c-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.slg-right {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.slg-time {
+  font-size: 0.57rem;
+  color: var(--c-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.slg-arrow {
+  color: var(--c-muted);
+  opacity: 0.5;
+  transition: transform 0.18s, opacity 0.18s;
+  flex-shrink: 0;
+}
 
 .sidebar-card {
   flex-shrink: 0;

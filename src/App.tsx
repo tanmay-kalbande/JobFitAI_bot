@@ -365,6 +365,19 @@ function AppContent() {
   // Single-page mode: separate from format so the 1-page tab never shows on regular resumes
   const [isSinglePageMode, setIsSinglePageMode] = useState(false);
 
+  // Sidebar scroll ref (for fade mask)
+  const sidebarDataRef = useRef<HTMLDivElement>(null);
+
+  // Quick-nav: jump to a version in the preview panel with smooth scroll
+  const handleQuickNavToVersion = useCallback((version: ResumeVersion) => {
+    handleSelectVersion(version);
+    setActiveTab('preview');
+    requestAnimationFrame(() => {
+      const el = document.getElementById('resume-cv-content');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [handleSelectVersion, setActiveTab]);
+
   useEffect(() => {
     if (!showQuickProvider) return;
     const handler = (e: MouseEvent) => {
@@ -792,7 +805,8 @@ function AppContent() {
               </button>
             </div>
 
-            <div className="sidebar-data-section">
+            <div className="sidebar-data-section" ref={sidebarDataRef}>
+              <div className="sidebar-fade-mask" />
               <div className={`card collapsible-card sidebar-card ${isResumeCollapsed ? 'collapsed' : ''}`}>
                 <div className="card-header" onClick={() => setIsResumeCollapsed(!isResumeCollapsed)} style={{ cursor: 'pointer' }}>
                   <div className="header-title">
@@ -827,6 +841,50 @@ function AppContent() {
                   </>
                 )}
               </div>
+
+              {/* ── Last Generated quick-nav ── */}
+              {versions.length > 0 && (() => {
+                const last = versions[0];
+                const typeInfo = (
+                  last.type === 'cover-letter' ? { icon: '✉', label: 'Cover Letter', color: '#c26b2d' }
+                  : last.type === 'tailored'   ? { icon: '✦', label: 'Tailored',     color: '#3b9eff' }
+                  : last.type === 'fixed'       ? { icon: '✓', label: 'Fixed',        color: '#22c55e' }
+                  :                              { icon: '◈', label: 'Resume',         color: '#a78bfa' }
+                );
+                const timeLabel = (() => {
+                  const d = new Date(last.timestamp);
+                  const now = new Date();
+                  const diffMs = now.getTime() - d.getTime();
+                  const diffMin = Math.floor(diffMs / 60000);
+                  if (diffMin < 1)  return 'Just now';
+                  if (diffMin < 60) return `${diffMin}m ago`;
+                  const diffH = Math.floor(diffMin / 60);
+                  if (diffH < 24) return `${diffH}h ago`;
+                  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                })();
+                return (
+                  <button
+                    key={last.id}
+                    className="sidebar-last-generated"
+                    onClick={() => handleQuickNavToVersion(last)}
+                    title={`Open: ${last.name}`}
+                  >
+                    <div className="slg-left">
+                      <span className="slg-icon" style={{ color: typeInfo.color }}>{typeInfo.icon}</span>
+                      <div className="slg-text">
+                        <span className="slg-label">{typeInfo.label}</span>
+                        <span className="slg-name">{last.name}</span>
+                      </div>
+                    </div>
+                    <div className="slg-right">
+                      <span className="slg-time">{timeLabel}</span>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="slg-arrow">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </div>
+                  </button>
+                );
+              })()}
             </div>
 
             {/* ── Sidebar footer with quick provider switcher ── */}
