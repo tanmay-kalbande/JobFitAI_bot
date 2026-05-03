@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    JOBFIT AI â€” Fixed Stylesheet
    ============================================================ */
 
@@ -2579,7 +2579,7 @@ a { color: inherit; text-decoration: none; }
   .preview-body { display: block !important; overflow: visible !important; height: auto !important; }
   .resume-wrapper { padding: 0 !important; overflow: visible !important; height: auto !important; background: white !important; display: block !important; }
   .resume-container, .resume-modern, .cv-classic, .cv-modern, .cover-letter-modern { width: 100% !important; max-width: 100% !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 !important; font-weight: 400 !important; text-align: left !important; }
-  .resume-container { padding: 0 !important; }
+  .resume-container:not(.compact-resume) { padding: 0 !important; }
   .resume-modern, .cv-classic, .cv-modern, .cover-letter-modern { padding: 10mm 15mm !important; }
   .resume-container .section, .resume-modern .rm-section { break-inside: avoid; page-break-inside: avoid; }
   .resume-container .section-title, .resume-modern .rm-sec-label { break-after: avoid; page-break-after: avoid; }
@@ -3189,35 +3189,38 @@ a { color: inherit; text-decoration: none; }
 /* â”€â”€ Print â€” enforce single page â”€â”€ */
 @media print {
   .compact-resume {
-    padding: 14mm 16mm;
-    width: 210mm;
-    max-width: 210mm;
+    padding: 12mm 15mm !important;
+    width: 210mm !important;
+    max-width: 210mm !important;
     max-height: 297mm;
     overflow: hidden;
-    font-size: 9pt;
-    border-radius: 0;
-    margin: 0;
+    font-size: 10.5pt;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
   }
 
-  .compact-name { font-size: 16pt; }
-  .compact-section-title { font-size: 7.5pt; }
-  .compact-job-title { font-size: 9pt; }
-  .compact-duties li { font-size: 8.5pt; }
-  .compact-company { font-size: 8pt; }
-  .compact-duration { font-size: 7.5pt; }
-  .compact-summary { font-size: 8.5pt; }
-  .compact-contact { font-size: 8pt; }
-  .compact-title { font-size: 8.5pt; }
-  .compact-skill-cat { font-size: 7pt; }
-  .compact-skill-val { font-size: 8pt; }
-  .compact-degree { font-size: 8.5pt; }
-  .compact-institution { font-size: 8pt; }
-  .compact-year { font-size: 7.5pt; }
-  .compact-cert-item { font-size: 7.5pt; }
-  .compact-project-item { font-size: 8.5pt; }
-  .compact-body { gap: 0 14pt; }
-  .compact-section { margin-bottom: 8pt; }
-  .compact-exp-item { margin-bottom: 6pt; }
+  .compact-name { font-size: 18pt !important; }
+  .compact-section-title { font-size: 8.5pt; margin-bottom: 5pt; }
+  .compact-job-title { font-size: 10pt; }
+  .compact-duties li { font-size: 9.5pt; margin-bottom: 2pt; }
+  .compact-company { font-size: 9pt; }
+  .compact-duration { font-size: 8.5pt; }
+  .compact-summary { font-size: 9.5pt; margin-bottom: 10pt; }
+  .compact-contact { font-size: 8.5pt; }
+  .compact-title { font-size: 10pt; }
+  .compact-skill-cat { font-size: 8pt; }
+  .compact-skill-val { font-size: 9pt; }
+  .compact-degree { font-size: 9.5pt; }
+  .compact-institution { font-size: 9pt; }
+  .compact-year { font-size: 8.5pt; }
+  .compact-cert-item { font-size: 8.5pt; }
+  .compact-project-item { font-size: 9.5pt; }
+  .compact-body { gap: 0 16pt; }
+  .compact-section { margin-bottom: 10pt; }
+  .compact-exp-item { margin-bottom: 7pt; }
+  .compact-header { margin-bottom: 6pt; }
+  .compact-rule { margin: 6pt 0 10pt 0; }
 }
 
 /* ============================================================
