@@ -362,6 +362,9 @@ function AppContent() {
   const [showQuickProvider, setShowQuickProvider] = useState(false);
   const qpsRef = useRef<HTMLDivElement>(null);
 
+  // Single-page mode: separate from format so the 1-page tab never shows on regular resumes
+  const [isSinglePageMode, setIsSinglePageMode] = useState(false);
+
   useEffect(() => {
     if (!showQuickProvider) return;
     const handler = (e: MouseEvent) => {
@@ -556,6 +559,7 @@ function AppContent() {
       const cleanedResume = cleanResumeData(resume);
       setGeneratedResume(cleanedResume); setGeneratedCoverLetter(null); setAtsKeywords([]);
       saveVersion(cleanedResume, 'base', undefined, undefined, undefined, undefined, undefined, undefined, undefined, getModelUsed());
+      setIsSinglePageMode(false);
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
       setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
     } catch (err) {
@@ -580,6 +584,7 @@ function AppContent() {
       } else { setAtsKeywords([]); }
       saveVersion(cleanedResume, 'tailored', result.companyName, result.companyShortName, result.jobTitle,
         result.changes, keywords, result.alignmentScore, result.alignmentDetails, getModelUsed(), result.proofMap);
+      setIsSinglePageMode(false);
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
       setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
     } catch (err) {
@@ -597,7 +602,8 @@ function AppContent() {
       setGeneratedResume(cleanedResume); setGeneratedCoverLetter(null); setAtsKeywords([]);
       saveVersion(cleanedResume, 'base', result.companyName, result.companyShortName, result.jobTitle,
         result.changes, [], undefined, undefined, getModelUsed(), result.proofMap);
-      setResumeFormat('compact');
+      setIsSinglePageMode(true);
+      setResumeFormat('classic'); // reset to classic sub-style
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
       setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
     } catch (err) {
@@ -615,6 +621,7 @@ function AppContent() {
       setGeneratedResume(null); setGeneratedCoverLetter(cleanedCL); setAtsKeywords([]);
       saveVersion(cleanedCL, 'cover-letter', result.companyName, result.companyShortName, result.jobTitle,
         result.changes, [], undefined, undefined, getModelUsed(), result.proofMap);
+      setIsSinglePageMode(false);
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
       setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
     } catch (err) {
@@ -1015,7 +1022,6 @@ function AppContent() {
                             <button className={`format-btn ${resumeFormat === 'classic' ? 'active' : ''}`} onClick={() => setResumeFormat('classic')}>Classic</button>
                             <button className={`format-btn ${resumeFormat === 'modern' ? 'active' : ''}`} onClick={() => setResumeFormat('modern')}>Modern</button>
                             <button className={`format-btn ${resumeFormat === 'executive' ? 'active' : ''}`} onClick={() => setResumeFormat('executive')}>Executive</button>
-                            <button className={`format-btn ${resumeFormat === 'compact' ? 'active' : ''}`} onClick={() => setResumeFormat('compact')} title="Single-page compact layout">1-Page</button>
                           </div>
                         </div>
                       </div>
@@ -1072,8 +1078,8 @@ function AppContent() {
                               resumeFormat === 'executive' ? <CoverLetterTemplateExecutive data={generatedCoverLetter} />
                               : resumeFormat === 'modern' ? <CoverLetterTemplateModern data={generatedCoverLetter} />
                               : <CoverLetterTemplate data={generatedCoverLetter} />
-                            ) : resumeFormat === 'compact' && generatedResume ? (
-                              <ResumeTemplateCompact data={generatedResume} />
+                            ) : isSinglePageMode && generatedResume ? (
+                              <ResumeTemplateCompact data={generatedResume} style={resumeFormat} />
                             ) : resumeFormat === 'executive' ? <ResumeTemplateExecutive data={generatedResume!} />
                               : resumeFormat === 'modern' ? <ResumeTemplateModern data={generatedResume!} />
                               : <ResumeTemplate data={generatedResume!} />
