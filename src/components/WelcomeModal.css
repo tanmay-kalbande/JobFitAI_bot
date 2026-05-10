@@ -1,0 +1,91 @@
+/* ============================================================
+   WELCOME MODAL
+   ============================================================ */
+
+.welcome-modal-overlay {
+  z-index: 2000;
+  backdrop-filter: blur(24px);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.welcome-modal {
+  background: var(--c-surface) !important;
+  border: 1px solid var(--c-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  max-width: 440px;
+}
+
+.welcome-modal .sm-header {
+  border-bottom: 1px solid var(--c-border);
+  padding: 1.5rem 1.75rem 1.25rem;
+}
+
+.welcome-modal .sm-title {
+  color: var(--c-text);
+  font-size: 1.1rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.welcome-modal .sm-subtitle {
+  color: var(--c-muted);
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.welcome-modal .sm-form {
+  padding: 1.5rem 1.75rem;
+}
+
+.welcome-modal .sm-label {
+  display: block;
+  color: var(--c-soft);
+  font-size: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-modal .sm-input {
+  width: 100%;
+  background: var(--c-panel);
+  border-color: var(--c-border);
+  color: var(--c-text);
+  min-height: 48px;
+  font-size: 0.9rem;
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--c-border);
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.welcome-modal .sm-input:focus {
+  outline: none;
+  border-color: var(--c-blue);
+  background: var(--c-raised);
+  box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.12);
+}
+
+.welcome-modal .sm-btn-save {
+  width: 100%;
+  border: none;
+  background: var(--c-text);
+  color: #111;
+  font-weight: 700;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.welcome-modal .sm-btn-save:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+  filter: brightness(1.1);
+}
+
+.welcome-modal .sm-btn-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
