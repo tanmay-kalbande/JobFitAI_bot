@@ -759,7 +759,19 @@ function AppContent() {
 
   const handleDownloadPDF = () => {
     const seoTitle = document.title;
-    const restoreTitle = () => { document.title = seoTitle; };
+    const printStyleId = 'jobfit-print-page-setup';
+    const existingPrintStyle = document.getElementById(printStyleId);
+    existingPrintStyle?.remove();
+
+    const printStyle = document.createElement('style');
+    printStyle.id = printStyleId;
+    printStyle.textContent = `@page { size: A4; margin: ${resumeFormat === 'modern' ? '10mm' : '0'}; }`;
+    document.head.appendChild(printStyle);
+
+    const restoreTitle = () => {
+      document.title = seoTitle;
+      printStyle.remove();
+    };
     document.title = buildPdfFileName(settings, generatedResume, generatedCoverLetter, currentVersion);
     window.addEventListener('afterprint', restoreTitle, { once: true });
     window.print();

@@ -166,6 +166,7 @@ export const GOOGLE_MODELS = [
 
 export const CEREBRAS_MODELS = [
   { value: 'llama3.1-8b',                        label: 'Llama 3.1 8B' },
+  { value: 'gpt-oss-120b',                       label: 'GPT-OSS 120B' },
   { value: 'qwen-3-235b-a22b-instruct-2507',     label: 'Qwen 3 235B A22B' },
 ];
 
@@ -196,6 +197,7 @@ export const SAMBANOVA_MODELS = [
 ];
 
 export const ZAI_MODELS = [
+  { value: 'glm-4.7',    label: 'GLM-4.7' },
   { value: 'glm-5.1',    label: 'GLM-5.1' },
   { value: 'glm-5',      label: 'GLM-5' },
   { value: 'glm-5-turbo', label: 'GLM-5-Turbo' },
