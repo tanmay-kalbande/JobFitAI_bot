@@ -935,7 +935,7 @@ function AppContent() {
     const nextState = resolveAppliedEditState({
       generatedResume, editLogs, nextData: cleanedData, description,
     });
-    const nextResume = cleanResumeData(nextState.generatedResume);
+    const nextResume = cleanResumeData(nextState.generatedResume ?? cleanedData);
     setEditLogs(nextState.editLogs);
     setGeneratedResume(nextResume);
     syncCurrentResumeVersion(nextResume);
