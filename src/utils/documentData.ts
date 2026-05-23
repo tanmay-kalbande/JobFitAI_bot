@@ -20,6 +20,17 @@ export function cleanAIText(text: string): string {
   return text.replace(/[\u2014\u2013]/g, '-');
 }
 
+export function normalizeLocationText(location: string | undefined): string {
+  const cleaned = cleanAIText(location ?? '').trim().replace(/\s+/g, ' ');
+  if (!cleaned) return '';
+
+  const mentionsRelocation = /\b(open|willing|available)\s+(?:to|for)\s+relocat/i.test(cleaned)
+    || /\brelocation\b/i.test(cleaned)
+    || (/\bpan\s*india\b/i.test(cleaned) && /\b(open|willing|available|relocat)/i.test(cleaned));
+
+  return mentionsRelocation ? 'Open to relocate' : cleaned;
+}
+
 export function cleanResumeData(data: ResumeData): ResumeData {
   const experiences = Array.isArray(data.experiences) ? data.experiences : [];
   const education = Array.isArray(data.education) ? data.education : [];
@@ -33,6 +44,7 @@ export function cleanResumeData(data: ResumeData): ResumeData {
 
     fullName: cleanAIText(data.fullName),
     title: cleanAIText(data.title),
+    location: normalizeLocationText(data.location),
     summary: cleanAIText(data.summary),
     experiences: experiences.map(exp => ({
       ...exp,
@@ -70,6 +82,7 @@ export function cleanCoverLetterData(data: CoverLetterData): CoverLetterData {
     ...data,
     fullName: cleanAIText(data.fullName),
     title: cleanAIText(data.title),
+    location: normalizeLocationText(data.location),
     opening: cleanAIText(data.opening),
     body: Array.isArray(data.body) ? data.body.map(line => cleanAIText(line)) : [],
     closing: cleanAIText(data.closing),

@@ -2818,6 +2818,11 @@ a { color: inherit; text-decoration: none; }
     margin: 10mm;
   }
 
+  @page resume-single-page {
+    size: A4;
+    margin: 6mm;
+  }
+
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   body { margin: 0 !important; }
   .app { position: static !important; display: block !important; inset: auto !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; height: auto !important; min-height: 0 !important; overflow: visible !important; }
@@ -2827,8 +2832,9 @@ a { color: inherit; text-decoration: none; }
   .preview-body { display: block !important; overflow: visible !important; height: auto !important; }
   .resume-wrapper, #resume-cv-content { width: 100% !important; max-width: 100% !important; padding: 0 !important; overflow: visible !important; height: auto !important; background: white !important; display: block !important; }
   .resume-wrapper>* { animation: none !important; }
-  .resume-container:not(.compact-modern), .re2-root { page: resume-no-margin; }
-  .resume-modern, .compact-modern, .cv-modern, .cover-letter-modern { page: resume-default-margin; }
+  .resume-container:not(.compact-resume), .re2-root { page: resume-no-margin; }
+  .resume-modern, .cv-modern, .cover-letter-modern { page: resume-default-margin; }
+  .compact-resume { page: resume-single-page; }
   .resume-container, .resume-modern, .re2-root, .cv-classic, .cv-modern, .cover-letter-modern { width: 100% !important; max-width: 100% !important; min-height: auto !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; margin: 0 !important; font-weight: 400 !important; text-align: left !important; }
   .resume-container:not(.compact-resume) { padding: 0 !important; }
   .resume-modern, .cv-classic, .cv-modern, .cover-letter-modern { padding: 0 !important; }

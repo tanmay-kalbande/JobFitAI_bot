@@ -513,7 +513,7 @@ TASK: Parse the raw resume text below and return ONLY a valid JSON object (no ma
   "linkedin": "string (full URL, or empty string)",
   "github": "string (full URL, or empty string)",
   "portfolio": "string (full URL, or empty string)",
-  "location": "string — preserve the candidate's stated location. If they explicitly say they are open to relocation, use 'Open to relocate' or 'City, Country | Open to relocate'. Do not invent a city.",
+  "location": "string — preserve the candidate's stated location. If they explicitly say they are open to relocation, output exactly 'Open to relocate'. Do not include a city/state with the relocation phrase.",
   "summary": "string — a 2-4 sentence professional summary. If the resume already has one, improve it for clarity and impact. If none exists, synthesize one from the candidate's experience and skills. Lead with years of experience and domain, then top skills, then a career-direction statement.",
   "education": [
     {
@@ -559,7 +559,7 @@ EXTRACTION RULES:
 6. CERTIFICATIONS FORMAT: "Certification Name | Issuer · Date". Example: "AWS Cloud Technical Essentials | Amazon Web Services · Dec 2024". If only the name exists, use just the name.
 7. BULLET IMPROVEMENT: While extracting, upgrade weak bullets. Change "Responsible for managing team" → "Led a cross-functional team of 5 engineers to deliver..." — but only when the original text provides enough context. Never invent details.
 8. DATE NORMALIZATION: Convert all dates to consistent "Mon YYYY" format (e.g., "Apr 2024").
-9. LOCATION: Do not over-specify location. Use a city only if the candidate provided it. If the candidate indicates relocation flexibility, preserve that signal as "Open to relocate" instead of forcing a local city.
+9. LOCATION: Do not over-specify location. Use a city only if the candidate provided it and did not mention relocation. If the candidate indicates relocation flexibility, output exactly "Open to relocate" and do not append or prepend city, state, country, or "PAN India".
 
 RESUME TEXT TO EXTRACT:
 ${resumeData}
@@ -707,7 +707,7 @@ RETURN a JSON object with this EXACT schema:
     "linkedin": "string",
     "github": "string",
     "portfolio": "string",
-    "location": "string — preserve the candidate's stated location or relocation preference; never invent a city",
+    "location": "string — preserve the candidate's stated location. If relocation is mentioned, output exactly 'Open to relocate' with no city/state",
     "summary": "string — rewritten to front-load the JD's top 3 requirements using the candidate's actual evidence",
     "education": [
       {
@@ -776,7 +776,7 @@ CRITICAL RULES:
 5. DEDUPLICATION: Each item in exactly one place. Certifications in "certifications" only, not also in "customSections".
 6. The "changes" array should list 4-6 specific, high-value edits with clear before→after reasoning.
 7. The "proofMap" should contain 6-10 of the most critical JD requirements mapped to evidence or gaps.
-8. Preserve relocation flexibility honestly. If the source says the candidate is open to relocate, keep "Open to relocate" in location rather than narrowing it to one city.
+8. Preserve relocation flexibility honestly. If the source says the candidate is open to relocate, set location to exactly "Open to relocate". Do not include city/state/country or "PAN India" in the same location line.
 
 INPUTS:
 
@@ -859,7 +859,7 @@ TASK: Return a JSON object following this EXACT schema:
     "linkedin": "string",
     "github": "string",
     "portfolio": "string",
-    "location": "string — preserve the candidate's stated location or relocation preference; never invent a city",
+    "location": "string — preserve the candidate's stated location. If relocation is mentioned, output exactly 'Open to relocate' with no city/state",
     "summary": "string — 2 sentences MAX. Role + top 2 skills + strongest result. No filler.",
     "education": [{ "degree": "string", "institution": "string", "year": "string", "details": "" }],
     "customSections": [],
@@ -883,7 +883,7 @@ CONDENSING RULES (follow strictly):
 8. NEVER invent facts. All content must come from the source resume.
 9. If a JD is provided, bias all choices toward JD-relevant content.
 10. Return ONLY valid JSON.
-11. Location should stay short. Prefer "Open to relocate" only when the source resume says that; otherwise preserve the supplied city/region or leave it empty if absent.
+11. Location should stay short. If the source resume says open/willing/available to relocate, output exactly "Open to relocate". Otherwise preserve the supplied city/region or leave it empty if absent.
 
 INPUTS:
 
@@ -956,7 +956,7 @@ TASK: Transform the source resume into a detailed CV. Return a JSON object with 
     "linkedin": "string",
     "github": "string",
     "portfolio": "string",
-    "location": "string",
+    "location": "string — if relocation is mentioned, output exactly 'Open to relocate' with no city/state",
     "summary": "string — a 4-6 sentence professional profile. Cover: domain expertise, years of experience, technical breadth, key achievements, and professional philosophy or career direction.",
     "education": [
       {
@@ -1002,7 +1002,8 @@ CRITICAL RULES:
 4. DEDUPLICATION: Each item in exactly one section.
 5. If a JD is provided, weight the expansion toward JD-relevant experience, but do not omit non-relevant sections.
 6. The "proofMap" array should contain 5-8 important themes mapped to evidence or gaps.
-7. Return ONLY valid JSON.
+7. If the source says open/willing/available to relocate, set location to exactly "Open to relocate". Do not combine it with a city/state/country or "PAN India".
+8. Return ONLY valid JSON.
 
 INPUTS:
 
@@ -1077,7 +1078,7 @@ TASK: Write a SHORT cover letter (250-300 words total body). Return a JSON objec
     "phone": "string",
     "linkedin": "string (URL if available, else empty string)",
     "portfolio": "string (URL if available, else empty string)",
-    "location": "string",
+    "location": "string — if relocation is mentioned, output exactly 'Open to relocate' with no city/state",
     "date": "${today}",
     "recipientName": "string — use 'Hiring Manager' if name not provided",
     "recipientTitle": "string — use department or company name",
@@ -1220,4 +1221,3 @@ Return format: ["keyword1", "keyword2", ...]`;
         return [];
     }
 }
-

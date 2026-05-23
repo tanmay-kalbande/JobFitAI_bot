@@ -763,9 +763,10 @@ function AppContent() {
     const existingPrintStyle = document.getElementById(printStyleId);
     existingPrintStyle?.remove();
 
+    const printMargin = isSinglePageMode ? '6mm' : resumeFormat === 'modern' ? '10mm' : '0';
     const printStyle = document.createElement('style');
     printStyle.id = printStyleId;
-    printStyle.textContent = `@page { size: A4; margin: ${resumeFormat === 'modern' ? '10mm' : '0'}; }`;
+    printStyle.textContent = `@page { size: A4; margin: ${printMargin}; }`;
     document.head.appendChild(printStyle);
 
     const restoreTitle = () => {
