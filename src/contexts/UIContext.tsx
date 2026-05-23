@@ -18,8 +18,6 @@ export interface UIContextType {
   setShowSettings: StateSetter<boolean>;
   showHome: boolean;
   setShowHome: StateSetter<boolean>;
-  showAgent: boolean;
-  setShowAgent: StateSetter<boolean>;
   activeTab: AppTab;
   setActiveTab: StateSetter<AppTab>;
   showChanges: boolean;

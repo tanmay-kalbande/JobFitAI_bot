@@ -26,8 +26,8 @@ import { SkeletonResume } from './components/SkeletonResume';
 import { QuickEditModal } from './components/QuickEditModal';
 import { EditHistoryPanel } from './components/EditHistoryPanel';
 import { HomeModal } from './components/HomeModal';
-import { AIAgentPanel } from './components/AIAgentPanel';
 import { ResumeTemplateCompact } from './components/ResumeTemplateCompact';
+import type { ResumeEditBlock, ResumeCanvasEditingProps } from './components/ResumeCanvasEditor';
 import { WelcomeModal } from './components/WelcomeModal';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useMobileKeyboardGuard } from './hooks/useMobileKeyboardGuard';
@@ -322,7 +322,6 @@ function AppProviders({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [showHome, setShowHome] = useState(false);
-  const [showAgent, setShowAgent] = useState(false);
   const [settings, setSettings] = useState<AISettings>(DEFAULT_SETTINGS);
   const [activeTab, setActiveTab] = useState<AppTab>('input');
   const [versions, setVersions] = useState<ResumeVersion[]>([]);
@@ -361,7 +360,6 @@ function AppProviders({ children }: { children: ReactNode }) {
     error, setError,
     showSettings, setShowSettings,
     showHome, setShowHome,
-    showAgent, setShowAgent,
     activeTab, setActiveTab,
     showChanges, setShowChanges,
     showProofMap, setShowProofMap,
@@ -374,7 +372,7 @@ function AppProviders({ children }: { children: ReactNode }) {
     saveHealthStatus, setSaveHealthStatus,
     lastSavedAt, setLastSavedAt,
   }), [
-    isLoading, loadingMessage, error, showSettings, showHome, showAgent, activeTab,
+    isLoading, loadingMessage, error, showSettings, showHome, activeTab,
     showChanges, showProofMap, isResumeCollapsed, showClearConfirm, showQuickEdit,
     showEditHistory, showLanding, hasHydrated, saveHealthStatus, lastSavedAt,
   ]);
@@ -414,7 +412,6 @@ function AppContent() {
     error, setError,
     showSettings, setShowSettings,
     showHome, setShowHome,
-    showAgent, setShowAgent,
     activeTab, setActiveTab,
     showChanges, setShowChanges,
     showProofMap, setShowProofMap,
@@ -434,6 +431,7 @@ function AppContent() {
 
   // Single-page mode: separate from format so the 1-page tab never shows on regular resumes
   const [isSinglePageMode, setIsSinglePageMode] = useState(false);
+  const [activeCanvasEditBlock, setActiveCanvasEditBlock] = useState<ResumeEditBlock | null>(null);
 
   // Sidebar scroll ref (for fade mask)
   const sidebarDataRef = useRef<HTMLDivElement>(null);
@@ -652,7 +650,7 @@ function AppContent() {
       saveVersion(cleanedResume, 'base', undefined, undefined, undefined, undefined, undefined, undefined, undefined, getModelUsed());
       setIsSinglePageMode(false);
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
-      setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
+      setShowEditHistory(false); setShowQuickEdit(false); setActiveCanvasEditBlock(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate resume');
     } finally { finishLoadingRequest(); }
@@ -677,7 +675,7 @@ function AppContent() {
         result.changes, keywords, result.alignmentScore, result.alignmentDetails, getModelUsed(), result.proofMap);
       setIsSinglePageMode(false);
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
-      setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
+      setShowEditHistory(false); setShowQuickEdit(false); setActiveCanvasEditBlock(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate tailored resume');
     } finally { finishLoadingRequest(); }
@@ -696,7 +694,7 @@ function AppContent() {
       setIsSinglePageMode(true);
       setResumeFormat('classic'); // reset to classic sub-style
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
-      setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
+      setShowEditHistory(false); setShowQuickEdit(false); setActiveCanvasEditBlock(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate single-page resume');
     } finally { finishLoadingRequest(); }
@@ -714,7 +712,7 @@ function AppContent() {
         result.changes, [], undefined, undefined, getModelUsed(), result.proofMap);
       setIsSinglePageMode(false);
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);
-      setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
+      setShowEditHistory(false); setShowQuickEdit(false); setActiveCanvasEditBlock(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate cover letter');
     } finally { finishLoadingRequest(); }
@@ -730,7 +728,7 @@ function AppContent() {
     setIsSinglePageMode(isSinglePageResumeVersion(version));
     setActiveTab(derivedState.activeTab);
     setShowChanges(!!(version.changes && version.changes.length > 0));
-    setShowProofMap(false); setShowAgent(false); setShowEditHistory(false); setShowQuickEdit(false);
+    setShowProofMap(false); setShowEditHistory(false); setShowQuickEdit(false); setActiveCanvasEditBlock(null);
     setEditLogs([]);
   };
 
@@ -754,7 +752,7 @@ function AppContent() {
     setJobDescription(resolvedState.jobDescription);
     setIsSinglePageMode(isSinglePageResumeVersion(resolvedState.currentVersion));
     setActiveTab(resolvedState.activeTab);
-    setShowChanges(false); setShowProofMap(false); setShowAgent(false);
+    setShowChanges(false); setShowProofMap(false); setActiveCanvasEditBlock(null);
   };
 
   const handleDownloadPDF = () => {
@@ -801,8 +799,8 @@ function AppContent() {
     setResumeInput(''); setJobDescription(''); setGeneratedResume(null);
     setGeneratedCoverLetter(null); setAtsKeywords([]); setCurrentVersion(null);
     setEditLogs([]); setError(''); setActiveTab('input');
-    setShowChanges(false); setShowProofMap(false); setShowAgent(false);
-    setShowEditHistory(false); setShowQuickEdit(false); setIsResumeCollapsed(false);
+    setShowChanges(false); setShowProofMap(false);
+    setShowEditHistory(false); setShowQuickEdit(false); setActiveCanvasEditBlock(null); setIsResumeCollapsed(false);
     setIsSinglePageMode(false);
     removeStorageItem(STORAGE_KEYS.RESUME_DATA);
     removeStorageItem(STORAGE_KEYS.JOB_DESCRIPTION);
@@ -810,7 +808,8 @@ function AppContent() {
   }, [
     setResumeInput, setJobDescription, setGeneratedResume, setGeneratedCoverLetter,
     setAtsKeywords, setCurrentVersion, setEditLogs, setError, setActiveTab,
-    setShowChanges, setShowProofMap, setShowAgent, setShowEditHistory, setShowQuickEdit,
+    setShowChanges, setShowProofMap, setShowEditHistory, setShowQuickEdit,
+    setActiveCanvasEditBlock,
     setIsResumeCollapsed, setShowClearConfirm,
   ]);
 
@@ -860,9 +859,9 @@ function AppContent() {
     setActiveTab('input');
     setShowChanges(false);
     setShowProofMap(false);
-    setShowAgent(false);
     setShowEditHistory(false);
     setShowQuickEdit(false);
+    setActiveCanvasEditBlock(null);
     setIsSinglePageMode(false);
     removeStorageItem(STORAGE_KEYS.VERSIONS);
     removeStorageItem(STORAGE_KEYS.EDIT_LOGS);
@@ -872,7 +871,8 @@ function AppContent() {
   }, [
     setVersions, setCurrentVersion, setGeneratedResume, setGeneratedCoverLetter,
     setAtsKeywords, setEditLogs, setError, setActiveTab, setShowChanges,
-    setShowProofMap, setShowAgent, setShowEditHistory, setShowQuickEdit,
+    setShowProofMap, setShowEditHistory, setShowQuickEdit,
+    setActiveCanvasEditBlock,
     resumeInput, jobDescription, atsEnabled, settings, isResumeCollapsed,
     resumeFormat,
   ]);
@@ -915,23 +915,51 @@ function AppContent() {
 
   const handleQuickEditSave = (updatedData: ResumeData, description: string) => {
     if (!generatedResume || currentVersion?.type === 'cover-letter') return;
-    const cleanedData = cleanResumeData(updatedData);
-    const nextState = resolveAppliedEditState({ generatedResume, editLogs, nextData: cleanedData, description });
-    setEditLogs(nextState.editLogs); setGeneratedResume(nextState.generatedResume); setShowQuickEdit(false);
+    applyManualResumeEdit(updatedData, description);
+    setShowQuickEdit(false);
   };
 
-  const handleAgentApply = (newResume: ResumeData, description: string) => {
+  const syncCurrentResumeVersion = (nextResume: ResumeData) => {
+    if (!currentVersion || currentVersion.type === 'cover-letter') return;
+    setCurrentVersion(prev => (
+      prev && prev.id === currentVersion.id ? { ...prev, data: nextResume } : prev
+    ));
+    setVersions(prev => prev.map(version => (
+      version.id === currentVersion.id ? { ...version, data: nextResume } : version
+    )));
+  };
+
+  const applyManualResumeEdit = (updatedData: ResumeData, description: string) => {
     if (!generatedResume || currentVersion?.type === 'cover-letter') return;
+    const cleanedData = cleanResumeData(updatedData);
     const nextState = resolveAppliedEditState({
-      generatedResume, editLogs, nextData: cleanResumeData(newResume), description: `AI Agent: ${description}`,
+      generatedResume, editLogs, nextData: cleanedData, description,
     });
-    setEditLogs(nextState.editLogs); setGeneratedResume(nextState.generatedResume);
+    const nextResume = cleanResumeData(nextState.generatedResume);
+    setEditLogs(nextState.editLogs);
+    setGeneratedResume(nextResume);
+    syncCurrentResumeVersion(nextResume);
+  };
+
+  const handleCanvasEditSave = (block: ResumeEditBlock, updatedData: ResumeData, description: string) => {
+    void block;
+    applyManualResumeEdit(updatedData, description);
+    setActiveCanvasEditBlock(null);
   };
 
   const handleRevertEdit = (log: ResumeEditLog) => {
     const revertedState = resolveRevertedEditState({ generatedResume, editLogs, revertId: log.id });
-    setGeneratedResume(revertedState.generatedResume ? cleanResumeData(revertedState.generatedResume) : null);
+    const revertedResume = revertedState.generatedResume ? cleanResumeData(revertedState.generatedResume) : null;
+    setGeneratedResume(revertedResume);
+    if (revertedResume) syncCurrentResumeVersion(revertedResume);
     setEditLogs(revertedState.editLogs);
+  };
+
+  const resumeCanvasEditing: ResumeCanvasEditingProps = {
+    activeBlock: activeCanvasEditBlock,
+    onStartEdit: setActiveCanvasEditBlock,
+    onCancelEdit: () => setActiveCanvasEditBlock(null),
+    onSaveBlock: handleCanvasEditSave,
   };
 
   useKeyboardShortcuts({
@@ -1306,13 +1334,6 @@ function AppContent() {
                       <div className="toolbar-actions">
                         {!isCoverLetterView && (
                           <>
-                            <button className={`toolbar-action-btn toolbar-action-agent ${showAgent ? 'active' : ''}`} onClick={() => setShowAgent(!showAgent)} title="Open AI Resume Agent">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
-                                <circle cx="9" cy="14" r="1" /><circle cx="15" cy="14" r="1" />
-                              </svg>
-                              AI Agent{showAgent && <span className="toolbar-badge" style={{ background: '#22c55e' }}>●</span>}
-                            </button>
                             <button className="toolbar-action-btn" onClick={() => setShowQuickEdit(true)}>
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -1350,21 +1371,18 @@ function AppContent() {
                         <ProofMapPanel version={currentVersion} onClose={() => setShowProofMap(false)} fullView />
                       ) : (
                         <>
-                          <div id="resume-cv-content" className={`resume-wrapper ${showAgent && !isCoverLetterView ? 'resume-wrapper-shrunk' : ''}`}>
+                          <div id="resume-cv-content" className="resume-wrapper">
                             {currentVersion?.type === 'cover-letter' && generatedCoverLetter ? (
                               resumeFormat === 'executive' ? <CoverLetterTemplateExecutive data={generatedCoverLetter} />
                               : resumeFormat === 'modern' ? <CoverLetterTemplateModern data={generatedCoverLetter} />
                               : <CoverLetterTemplate data={generatedCoverLetter} />
                             ) : isSinglePageMode && generatedResume ? (
-                              <ResumeTemplateCompact data={generatedResume} style={resumeFormat} />
-                            ) : resumeFormat === 'executive' ? <ResumeTemplateExecutive data={generatedResume!} />
-                              : resumeFormat === 'modern' ? <ResumeTemplateModern data={generatedResume!} />
-                              : <ResumeTemplate data={generatedResume!} />
+                              <ResumeTemplateCompact data={generatedResume} style={resumeFormat} editing={resumeCanvasEditing} />
+                            ) : resumeFormat === 'executive' ? <ResumeTemplateExecutive data={generatedResume!} editing={resumeCanvasEditing} />
+                              : resumeFormat === 'modern' ? <ResumeTemplateModern data={generatedResume!} editing={resumeCanvasEditing} />
+                              : <ResumeTemplate data={generatedResume!} editing={resumeCanvasEditing} />
                             }
                           </div>
-                          {showAgent && !isCoverLetterView && generatedResume && (
-                            <AIAgentPanel resume={generatedResume} settings={settings} onApply={handleAgentApply} onClose={() => setShowAgent(false)} />
-                          )}
                         </>
                       )}
                     </div>

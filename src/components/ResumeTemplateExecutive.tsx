@@ -1,9 +1,11 @@
 import { memo } from 'react';
 import type { ResumeData } from '../types';
 import { formatSkillCategory } from '../types';
+import { EditableResumeBlock, type ResumeCanvasEditingProps } from './ResumeCanvasEditor';
 
 interface ResumeTemplateExecutiveProps {
     data: ResumeData;
+    editing?: ResumeCanvasEditingProps;
 }
 
 function isValidUrl(url: string): boolean {
@@ -40,7 +42,7 @@ const Linkify = memo(function Linkify({ text }: { text: string }) {
     );
 });
 
-export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ data }: ResumeTemplateExecutiveProps) {
+export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ data, editing }: ResumeTemplateExecutiveProps) {
     const contactItems = [
         data.email,
         data.phone,
@@ -52,8 +54,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
 
     return (
         <div className="re2-root">
-            {/* ── Header ── */}
-            <header className="re2-header">
+            <EditableResumeBlock data={data} editing={editing} block={{ type: 'header' }} label="Header" className="re2-header">
                 <div className="re2-name-block">
                     <h1 className="re2-name">{data.fullName || 'Your Name'}</h1>
                     <div className="re2-role">{data.title || 'Professional Title'}</div>
@@ -63,28 +64,33 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                         <span key={i} className="re2-contact-item">{item}</span>
                     ))}
                 </div>
-            </header>
+            </EditableResumeBlock>
 
             <div className="re2-rule-top" />
 
             <div className="re2-body">
-                {/* ── Summary ── */}
                 {data.summary && (
-                    <section className="re2-section">
+                    <EditableResumeBlock data={data} editing={editing} block={{ type: 'summary' }} label="Profile" className="re2-section">
                         <div className="re2-section-label">Profile</div>
                         <div className="re2-section-content">
                             <p className="re2-summary"><Linkify text={data.summary} /></p>
                         </div>
-                    </section>
+                    </EditableResumeBlock>
                 )}
 
-                {/* ── Experience ── */}
                 {data.experiences?.length > 0 && (
                     <section className="re2-section">
                         <div className="re2-section-label">Experience</div>
                         <div className="re2-section-content">
                             {data.experiences.map((exp, i) => (
-                                <div key={i} className="re2-entry">
+                                <EditableResumeBlock
+                                    key={`${exp.jobTitle}-${exp.company}-${exp.duration}`}
+                                    data={data}
+                                    editing={editing}
+                                    block={{ type: 'experience', index: i }}
+                                    label={exp.jobTitle || `Experience ${i + 1}`}
+                                    className="re2-entry"
+                                >
                                     <div className="re2-entry-head">
                                         <div className="re2-entry-left">
                                             <div className="re2-entry-title">{exp.jobTitle}</div>
@@ -99,19 +105,25 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                                             ))}
                                         </ul>
                                     )}
-                                </div>
+                                </EditableResumeBlock>
                             ))}
                         </div>
                     </section>
                 )}
 
-                {/* ── Projects ── */}
                 {data.projects?.length > 0 && (
                     <section className="re2-section">
                         <div className="re2-section-label">Projects</div>
                         <div className="re2-section-content">
                             {data.projects.map((p, i) => (
-                                <div key={i} className="re2-entry">
+                                <EditableResumeBlock
+                                    key={`${p.title}-${p.description.slice(0, 30)}`}
+                                    data={data}
+                                    editing={editing}
+                                    block={{ type: 'project', index: i }}
+                                    label={p.title || `Project ${i + 1}`}
+                                    className="re2-entry"
+                                >
                                     <div className="re2-entry-head">
                                         <div className="re2-entry-title">
                                             {p.url
@@ -121,15 +133,14 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                                         </div>
                                     </div>
                                     <p className="re2-proj-desc"><Linkify text={p.description} /></p>
-                                </div>
+                                </EditableResumeBlock>
                             ))}
                         </div>
                     </section>
                 )}
 
-                {/* ── Skills ── */}
                 {data.skills && Object.keys(data.skills).length > 0 && (
-                    <section className="re2-section">
+                    <EditableResumeBlock data={data} editing={editing} block={{ type: 'skills' }} label="Skills" className="re2-section">
                         <div className="re2-section-label">Skills</div>
                         <div className="re2-section-content">
                             <div className="re2-skills-grid">
@@ -143,16 +154,22 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                                 )}
                             </div>
                         </div>
-                    </section>
+                    </EditableResumeBlock>
                 )}
 
-                {/* ── Education ── */}
                 {(data.education?.length ?? 0) > 0 && (
                     <section className="re2-section">
                         <div className="re2-section-label">Education</div>
                         <div className="re2-section-content">
                             {data.education?.map((edu, i) => (
-                                <div key={i} className="re2-entry">
+                                <EditableResumeBlock
+                                    key={`${edu.degree}-${edu.institution}-${edu.year}`}
+                                    data={data}
+                                    editing={editing}
+                                    block={{ type: 'education', index: i }}
+                                    label={edu.degree || `Education ${i + 1}`}
+                                    className="re2-entry"
+                                >
                                     <div className="re2-entry-head">
                                         <div className="re2-entry-left">
                                             <div className="re2-entry-title">{edu.degree}</div>
@@ -161,15 +178,14 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                                         <div className="re2-entry-date">{edu.year}</div>
                                     </div>
                                     {edu.details && <p className="re2-proj-desc">{edu.details}</p>}
-                                </div>
+                                </EditableResumeBlock>
                             ))}
                         </div>
                     </section>
                 )}
 
-                {/* ── Certifications ── */}
                 {data.certifications?.length > 0 && (
-                    <section className="re2-section">
+                    <EditableResumeBlock data={data} editing={editing} block={{ type: 'certifications' }} label="Certifications" className="re2-section">
                         <div className="re2-section-label">Certifications</div>
                         <div className="re2-section-content">
                             <div className="re2-cert-list">
@@ -186,19 +202,27 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                                 })}
                             </div>
                         </div>
-                    </section>
+                    </EditableResumeBlock>
                 )}
 
-                {/* ── Custom sections ── */}
-                {data.customSections?.filter(s => !s.title.toLowerCase().includes('certific')).map((s, i) => (
-                    <section key={i} className="re2-section">
+                {data.customSections?.map((s, i) => (
+                    s.title.toLowerCase().includes('certific') ? null : (
+                    <EditableResumeBlock
+                        key={i}
+                        data={data}
+                        editing={editing}
+                        block={{ type: 'custom', index: i }}
+                        label={s.title}
+                        className="re2-section"
+                    >
                         <div className="re2-section-label">{s.title}</div>
                         <div className="re2-section-content">
                             <ul className="re2-bullets">
                                 {s.items.map((item, j) => <li key={j}><Linkify text={item} /></li>)}
                             </ul>
                         </div>
-                    </section>
+                    </EditableResumeBlock>
+                    )
                 ))}
             </div>
 

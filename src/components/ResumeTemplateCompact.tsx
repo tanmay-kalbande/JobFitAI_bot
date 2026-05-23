@@ -1,10 +1,12 @@
 import { memo } from 'react';
 import type { ResumeData, ResumeFormat } from '../types';
 import { formatSkillCategory } from '../types';
+import { EditableResumeBlock, type ResumeCanvasEditingProps } from './ResumeCanvasEditor';
 
 interface ResumeTemplateCompactProps {
   data: ResumeData;
-  style?: ResumeFormat; // 'classic' | 'modern' | 'executive'
+  style?: ResumeFormat;
+  editing?: ResumeCanvasEditingProps;
 }
 
 function isValidUrl(url: string): boolean {
@@ -20,38 +22,36 @@ function isValidUrl(url: string): boolean {
 function truncate(text: string, maxChars: number): string {
   if (!text) return '';
   if (text.length <= maxChars) return text;
-  return text.slice(0, maxChars).trimEnd() + '…';
+  return `${text.slice(0, maxChars).trimEnd()}...`;
 }
 
 export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
   data,
   style = 'classic',
+  editing,
 }: ResumeTemplateCompactProps) {
-  const MAX_JOBS     = 3;
-  const MAX_BULLETS  = 3;
+  const MAX_JOBS = 3;
+  const MAX_BULLETS = 3;
   const MAX_PROJECTS = 2;
-  const MAX_CERTS    = 3;
+  const MAX_CERTS = 3;
 
-  const experiences  = (data.experiences ?? []).slice(0, MAX_JOBS);
-  const projects     = (data.projects ?? []).slice(0, MAX_PROJECTS);
-  const certs        = (data.certifications ?? []).slice(0, MAX_CERTS);
+  const experiences = (data.experiences ?? []).slice(0, MAX_JOBS);
+  const projects = (data.projects ?? []).slice(0, MAX_PROJECTS);
+  const certs = (data.certifications ?? []).slice(0, MAX_CERTS);
   const skillEntries = Object.entries(data.skills ?? {});
 
-  // CSS class suffix drives all visual variants via App.css
   const variant = style === 'modern' ? 'compact-modern' : style === 'executive' ? 'compact-executive' : 'compact-classic';
 
   return (
     <div className={`resume-container compact-resume ${variant}`}>
-
-      {/* ── Header ── */}
-      <div className="compact-header">
+      <EditableResumeBlock data={data} editing={editing} block={{ type: 'header' }} label="Header" className="compact-header">
         <div className="compact-name-block">
           <h1 className="compact-name">{data.fullName?.toUpperCase() || 'YOUR NAME'}</h1>
           <div className="compact-title">{data.title || 'Your Title'}</div>
         </div>
         <div className="compact-contact">
-          {data.email    && <span>{data.email}</span>}
-          {data.phone    && <span>{data.phone}</span>}
+          {data.email && <span>{data.email}</span>}
+          {data.phone && <span>{data.phone}</span>}
           {data.location && <span>{data.location}</span>}
           {isValidUrl(data.linkedin) && (
             <span><a href={data.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></span>
@@ -63,25 +63,30 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
             <span><a href={data.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a></span>
           )}
         </div>
-      </div>
+      </EditableResumeBlock>
 
       <hr className="compact-rule" />
 
-      {/* ── Summary ── */}
       {data.summary && (
-        <p className="compact-summary">{truncate(data.summary, 300)}</p>
+        <EditableResumeBlock data={data} editing={editing} block={{ type: 'summary' }} label="Summary" className="compact-summary-block">
+          <p className="compact-summary">{truncate(data.summary, 300)}</p>
+        </EditableResumeBlock>
       )}
 
-      {/* ── Two-column body ── */}
       <div className="compact-body">
-
-        {/* Left: Experience + Projects */}
         <div className="compact-main">
           {experiences.length > 0 && (
             <section className="compact-section">
               <h2 className="compact-section-title">Experience</h2>
-              {experiences.map((exp) => (
-                <div key={`${exp.jobTitle}-${exp.company}`} className="compact-exp-item">
+              {experiences.map((exp, expIdx) => (
+                <EditableResumeBlock
+                  key={`${exp.jobTitle}-${exp.company}`}
+                  data={data}
+                  editing={editing}
+                  block={{ type: 'experience', index: expIdx }}
+                  label={exp.jobTitle || `Experience ${expIdx + 1}`}
+                  className="compact-exp-item"
+                >
                   <div className="compact-exp-header">
                     <span className="compact-job-title">{exp.jobTitle}</span>
                     <span className="compact-duration">{exp.duration}</span>
@@ -94,7 +99,7 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
                       ))}
                     </ul>
                   )}
-                </div>
+                </EditableResumeBlock>
               ))}
             </section>
           )}
@@ -102,25 +107,31 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
           {projects.length > 0 && (
             <section className="compact-section">
               <h2 className="compact-section-title">Projects</h2>
-              {projects.map((proj) => (
-                <div key={proj.title} className="compact-project-item">
+              {projects.map((proj, projectIdx) => (
+                <EditableResumeBlock
+                  key={proj.title}
+                  data={data}
+                  editing={editing}
+                  block={{ type: 'project', index: projectIdx }}
+                  label={proj.title || `Project ${projectIdx + 1}`}
+                  className="compact-project-item"
+                >
                   <span className="compact-proj-title">
                     {isValidUrl(proj.url ?? '') ? (
                       <a href={proj.url} target="_blank" rel="noopener noreferrer">{proj.title}</a>
                     ) : proj.title}
                   </span>
-                  {' — '}
+                  {' - '}
                   <span className="compact-proj-desc">{truncate(proj.description, 100)}</span>
-                </div>
+                </EditableResumeBlock>
               ))}
             </section>
           )}
         </div>
 
-        {/* Right: Skills + Education + Certs */}
         <div className="compact-sidebar">
           {skillEntries.length > 0 && (
-            <section className="compact-section">
+            <EditableResumeBlock data={data} editing={editing} block={{ type: 'skills' }} label="Skills" className="compact-section">
               <h2 className="compact-section-title">Skills</h2>
               <div className="compact-skills">
                 {skillEntries.map(([cat, val]) => val && (
@@ -130,24 +141,31 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
                   </div>
                 ))}
               </div>
-            </section>
+            </EditableResumeBlock>
           )}
 
           {data.education && data.education.length > 0 && (
             <section className="compact-section">
               <h2 className="compact-section-title">Education</h2>
-              {data.education.slice(0, 2).map((edu) => (
-                <div key={`${edu.degree}-${edu.institution}`} className="compact-edu-item">
+              {data.education.slice(0, 2).map((edu, eduIdx) => (
+                <EditableResumeBlock
+                  key={`${edu.degree}-${edu.institution}`}
+                  data={data}
+                  editing={editing}
+                  block={{ type: 'education', index: eduIdx }}
+                  label={edu.degree || `Education ${eduIdx + 1}`}
+                  className="compact-edu-item"
+                >
                   <div className="compact-degree">{edu.degree}</div>
                   <div className="compact-institution">{edu.institution}</div>
                   <div className="compact-year">{edu.year}</div>
-                </div>
+                </EditableResumeBlock>
               ))}
             </section>
           )}
 
           {certs.length > 0 && (
-            <section className="compact-section">
+            <EditableResumeBlock data={data} editing={editing} block={{ type: 'certifications' }} label="Certifications" className="compact-section">
               <h2 className="compact-section-title">Certifications</h2>
               {certs.map((cert) => {
                 const pipeIdx = cert.indexOf('|');
@@ -160,7 +178,7 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
                   </div>
                 );
               })}
-            </section>
+            </EditableResumeBlock>
           )}
         </div>
       </div>

@@ -1,12 +1,13 @@
 import { memo } from 'react';
 import type { ResumeData } from '../types';
 import { formatSkillCategory } from '../types';
+import { EditableResumeBlock, type ResumeCanvasEditingProps } from './ResumeCanvasEditor';
 
 interface ResumeTemplateModernProps {
     data: ResumeData;
+    editing?: ResumeCanvasEditingProps;
 }
 
-// Helper to validate URLs
 function isValidUrl(url: string): boolean {
     if (!url || typeof url !== 'string') return false;
     try {
@@ -17,7 +18,6 @@ function isValidUrl(url: string): boolean {
     }
 }
 
-// Helper to auto-linkify text
 const Linkify = memo(function Linkify({ text }: { text: string }) {
     if (!text) return null;
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -38,7 +38,6 @@ const Linkify = memo(function Linkify({ text }: { text: string }) {
     );
 });
 
-// Helper to extract display domain from URL
 function displayUrl(url: string): string {
     try {
         const parsed = new URL(url);
@@ -48,44 +47,48 @@ function displayUrl(url: string): string {
     }
 }
 
-export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data }: ResumeTemplateModernProps) {
+export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, editing }: ResumeTemplateModernProps) {
     return (
         <div className="resume-modern">
-            {/* HEADER */}
-            <div className="rm-head">
+            <EditableResumeBlock data={data} editing={editing} block={{ type: 'header' }} label="Header" className="rm-head">
                 <div className="rm-head-name">{data.fullName || 'Your Name'}</div>
                 <div className="rm-head-title">{data.title || 'Your Title'}</div>
                 <div className="rm-head-contact">
                     {data.email && <span>{data.email}</span>}
-                    {data.email && data.phone && <span className="rm-sep">·</span>}
+                    {data.email && data.phone && <span className="rm-sep">.</span>}
                     {data.phone && <span>{data.phone}</span>}
-                    {data.location && <><span className="rm-sep">·</span><span>{data.location}</span></>}
+                    {data.location && <><span className="rm-sep">.</span><span>{data.location}</span></>}
                     {isValidUrl(data.portfolio) && (
-                        <><span className="rm-sep">·</span><a href={data.portfolio} target="_blank" rel="noopener noreferrer">{displayUrl(data.portfolio)}</a></>
+                        <><span className="rm-sep">.</span><a href={data.portfolio} target="_blank" rel="noopener noreferrer">{displayUrl(data.portfolio)}</a></>
                     )}
                     {isValidUrl(data.linkedin) && (
-                        <><span className="rm-sep">·</span><a href={data.linkedin} target="_blank" rel="noopener noreferrer">{displayUrl(data.linkedin)}</a></>
+                        <><span className="rm-sep">.</span><a href={data.linkedin} target="_blank" rel="noopener noreferrer">{displayUrl(data.linkedin)}</a></>
                     )}
                     {isValidUrl(data.github) && (
-                        <><span className="rm-sep">·</span><a href={data.github} target="_blank" rel="noopener noreferrer">{displayUrl(data.github)}</a></>
+                        <><span className="rm-sep">.</span><a href={data.github} target="_blank" rel="noopener noreferrer">{displayUrl(data.github)}</a></>
                     )}
                 </div>
-            </div>
+            </EditableResumeBlock>
 
-            {/* SUMMARY */}
             {data.summary && (
-                <section className="rm-section">
+                <EditableResumeBlock data={data} editing={editing} block={{ type: 'summary' }} label="Summary" className="rm-section">
                     <div className="rm-sec-label">Summary</div>
                     <p className="rm-summary"><Linkify text={data.summary} /></p>
-                </section>
+                </EditableResumeBlock>
             )}
 
-            {/* EXPERIENCE */}
             {data.experiences && data.experiences.length > 0 && (
                 <section className="rm-section">
                     <div className="rm-sec-label">Experience</div>
-                    {data.experiences.map((exp) => (
-                        <div key={`${exp.jobTitle}-${exp.company}-${exp.duration}`} className="rm-entry">
+                    {data.experiences.map((exp, expIdx) => (
+                        <EditableResumeBlock
+                            key={`${exp.jobTitle}-${exp.company}-${exp.duration}`}
+                            data={data}
+                            editing={editing}
+                            block={{ type: 'experience', index: expIdx }}
+                            label={exp.jobTitle || `Experience ${expIdx + 1}`}
+                            className="rm-entry"
+                        >
                             <div className="rm-entry-top">
                                 <div className="rm-entry-title">{exp.jobTitle}</div>
                                 <div className="rm-entry-period">{exp.duration}</div>
@@ -98,31 +101,36 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data }:
                                     ))}
                                 </ul>
                             )}
-                        </div>
+                        </EditableResumeBlock>
                     ))}
                 </section>
             )}
 
-            {/* EDUCATION */}
             {data.education && data.education.length > 0 && (
                 <section className="rm-section">
                     <div className="rm-sec-label">Education</div>
-                    {data.education.map((edu) => (
-                        <div key={`${edu.degree}-${edu.institution}-${edu.year}`} className="rm-entry">
+                    {data.education.map((edu, eduIdx) => (
+                        <EditableResumeBlock
+                            key={`${edu.degree}-${edu.institution}-${edu.year}`}
+                            data={data}
+                            editing={editing}
+                            block={{ type: 'education', index: eduIdx }}
+                            label={edu.degree || `Education ${eduIdx + 1}`}
+                            className="rm-entry"
+                        >
                             <div className="rm-entry-top">
                                 <div className="rm-entry-title">{edu.degree}</div>
                                 <div className="rm-entry-period">{edu.year}</div>
                             </div>
                             <div className="rm-entry-org">{edu.institution}</div>
                             {edu.details && <div className="rm-entry-sub">{edu.details}</div>}
-                        </div>
+                        </EditableResumeBlock>
                     ))}
                 </section>
             )}
 
-            {/* SKILLS */}
             {data.skills && Object.keys(data.skills).length > 0 && (
-                <section className="rm-section">
+                <EditableResumeBlock data={data} editing={editing} block={{ type: 'skills' }} label="Skills" className="rm-section">
                     <div className="rm-sec-label">Skills</div>
                     <table className="rm-skills-table" role="presentation">
                         <tbody>
@@ -136,15 +144,21 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data }:
                             )}
                         </tbody>
                     </table>
-                </section>
+                </EditableResumeBlock>
             )}
 
-            {/* PROJECTS */}
             {data.projects && data.projects.length > 0 && (
                 <section className="rm-section">
                     <div className="rm-sec-label">Projects</div>
-                    {data.projects.map((project) => (
-                        <div key={`${project.title}-${project.description.slice(0, 30)}`} className="rm-project">
+                    {data.projects.map((project, projectIdx) => (
+                        <EditableResumeBlock
+                            key={`${project.title}-${project.description.slice(0, 30)}`}
+                            data={data}
+                            editing={editing}
+                            block={{ type: 'project', index: projectIdx }}
+                            label={project.title || `Project ${projectIdx + 1}`}
+                            className="rm-project"
+                        >
                             <div className="rm-proj-top">
                                 <span className="rm-proj-name">{project.title}</span>
                             </div>
@@ -159,14 +173,13 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data }:
                                     {displayUrl(project.url.startsWith('http') ? project.url : `https://${project.url}`)}
                                 </a>
                             )}
-                        </div>
+                        </EditableResumeBlock>
                     ))}
                 </section>
             )}
 
-            {/* CERTIFICATIONS */}
             {data.certifications && data.certifications.length > 0 && (
-                <section className="rm-section">
+                <EditableResumeBlock data={data} editing={editing} block={{ type: 'certifications' }} label="Certifications" className="rm-section">
                     <div className="rm-sec-label">Certifications</div>
                     <div className="rm-cert-list">
                         {data.certifications.map((cert) => {
@@ -181,15 +194,21 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data }:
                             );
                         })}
                     </div>
-                </section>
+                </EditableResumeBlock>
             )}
 
-            {/* CUSTOM SECTIONS */}
             {data.customSections && data.customSections.length > 0 && (
                 data.customSections
-                    .filter(section => !section.title.toLowerCase().includes('certific'))
-                    .map((section) => (
-                        <section key={section.title} className="rm-section">
+                    .map((section, sectionIdx) => (
+                        section.title.toLowerCase().includes('certific') ? null : (
+                        <EditableResumeBlock
+                            key={section.title}
+                            data={data}
+                            editing={editing}
+                            block={{ type: 'custom', index: sectionIdx }}
+                            label={section.title}
+                            className="rm-section"
+                        >
                             <div className="rm-sec-label">{section.title}</div>
                             <ul className="rm-bullets">
                                 {(Array.isArray(section.items)
@@ -201,7 +220,8 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data }:
                                     <li key={item.slice(0, 50)}><Linkify text={item} /></li>
                                 ))}
                             </ul>
-                        </section>
+                        </EditableResumeBlock>
+                        )
                     ))
             )}
         </div>
