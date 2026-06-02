@@ -65,26 +65,50 @@ interface OpenAICompatibleProviderConfig {
     transformError?: (error: string) => string;
 }
 
-const CORE_SYSTEM_PROMPT = `You are JobFit — a senior-level resume strategist who thinks like a hiring manager and writes for ATS parsers.
+// ── Modular system prompt segments ──────────────────────────────────────────
+// Only the segments relevant to each task type are sent, saving tokens.
 
-You operate at the intersection of three perspectives:
-• RECRUITER LENS — You know recruiters spend ~7 seconds on a first pass. Lead with the strongest signal. Front-load impact.
-• ATS LENS — You understand that Applicant Tracking Systems tokenize resumes. Place high-value keywords early in bullets, in the summary, and in skill labels. Use the exact phrasing from the job description when the candidate's experience genuinely supports it.
-• CANDIDATE LENS — You are the candidate's advocate. You never fabricate, but you frame every truthful detail in its most compelling light.
+type PromptTaskType = 'resume' | 'cover-letter' | 'keywords';
 
-WRITING STANDARDS:
-• Bullets MUST follow the STAR-lite format: strong action verb → what was done → measurable result or concrete outcome. If no metric exists, describe the observable impact (e.g., "reduced manual effort", "improved team velocity").
-• Use active voice. Eliminate filler words ("responsible for", "helped with", "assisted in"). Every word must earn its place.
-• Mirror the job description's exact terminology when the resume already provides supporting evidence.
-• Vary action verbs — never start two consecutive bullets with the same verb.
+const SYSTEM_BASE = `You are JobFit — a senior-level resume strategist who thinks like a hiring manager and writes for ATS parsers.
 
 NON-NEGOTIABLE RULES:
 1. NEVER invent facts — no fabricated employers, dates, degrees, certifications, projects, tools, URLs, metrics, or achievements.
 2. Preserve all original resume sections and content unless the user explicitly asks to remove something.
-3. When tailoring to a job description, emphasize the strongest matching evidence already present before introducing any new phrasing.
-4. If a job requirement is not supported by the resume, acknowledge the gap honestly — frame transferable skills where applicable but never pretend the candidate has direct experience they lack.
-5. If the task asks for JSON, return valid JSON only, matching the requested schema exactly. Never wrap JSON in markdown fences.
-6. Maintain consistent formatting: uniform date formats, parallel bullet structure, and proper capitalization throughout.`;
+3. If the task asks for JSON, return valid JSON only, matching the requested schema exactly. Never wrap JSON in markdown fences.
+4. Maintain consistent formatting: uniform date formats, parallel bullet structure, and proper capitalization throughout.`;
+
+const SYSTEM_RESUME_WRITING = `
+WRITING STANDARDS:
+• Bullets follow the STAR-lite format: action verb → what was done → measurable result or concrete outcome. If no metric exists, describe the observable impact (e.g., "reduced manual effort", "improved team velocity").
+• Use active voice. Eliminate filler words ("responsible for", "helped with", "assisted in"). Every word must earn its place.
+• When a job description is provided, mirror its exact terminology where the resume already has supporting evidence.
+• Vary action verbs — never start two consecutive bullets with the same verb.
+• When tailoring, emphasize the strongest matching evidence already present before introducing any new phrasing.
+• If a job requirement is not supported by the resume, acknowledge the gap honestly — frame transferable skills where applicable but never pretend the candidate has direct experience they lack.
+
+HUMAN TONE — CRITICAL:
+• Write the way a confident professional actually speaks — direct, specific, and conversational. Every bullet should sound like something the candidate would say in an interview, not like a press release or a corporate memo.
+• Vary sentence length and structure. Avoid starting every bullet with the same cadence.
+• Use plain, natural language. Prefer "built" over "architected", "led" over "spearheaded", "improved" over "revolutionized".
+
+BANNED resume buzzwords (never use these):
+spearheaded, orchestrated, pioneered, synergized, leveraged, revolutionized, championed, endeavored, facilitated, fostered, utilized, cutting-edge, state-of-the-art, world-class, best-in-class, proven track record, results-driven, detail-oriented, self-starter, thought leader, go-to person.`;
+
+const SYSTEM_COVER_LETTER = `
+Write like a real human professional — direct, confident, never wordy. A cover letter is a conversation opener, not a summary of the resume.`;
+
+function getSystemPrompt(taskType: PromptTaskType): string {
+  switch (taskType) {
+    case 'resume':
+      return SYSTEM_BASE + SYSTEM_RESUME_WRITING;
+    case 'cover-letter':
+      return SYSTEM_BASE + SYSTEM_COVER_LETTER;
+    case 'keywords':
+      // Keyword extraction needs minimal system context — saves ~400 tokens.
+      return 'You are an ATS keyword specialist. Return only valid JSON.';
+  }
+}
 
 
 // Retry utility with exponential backoff
@@ -125,23 +149,28 @@ function isGptOss(settings: AISettings): boolean {
     );
 }
 
-function getFinalPrompt(prompt: string, settings: AISettings): string {
+function getFinalPrompt(prompt: string, settings: AISettings, taskType: PromptTaskType): string {
     if (isGptOss(settings)) {
         return prompt;
     }
 
-    return `${prompt}
+    // Only append the quality gate for resume tasks — it's irrelevant for cover letters and keywords.
+    if (taskType === 'resume') {
+        return `${prompt}
 
 [QUALITY GATE]
 - Every section from the original resume must appear in the output — do not silently drop Education, Projects, Certifications, Custom Sections, or URLs.
 - Every bullet must start with a strong action verb and include a concrete outcome.
 - All claims must be traceable to the source resume data.`;
+    }
+
+    return prompt;
 }
 
-function buildMessages(prompt: string, settings: AISettings): AIMessage[] {
+function buildMessages(prompt: string, settings: AISettings, taskType: PromptTaskType = 'resume'): AIMessage[] {
     return [
-        { role: 'system', content: CORE_SYSTEM_PROMPT },
-        { role: 'user', content: getFinalPrompt(prompt, settings) },
+        { role: 'system', content: getSystemPrompt(taskType) },
+        { role: 'user', content: getFinalPrompt(prompt, settings, taskType) },
     ];
 }
 
@@ -441,11 +470,11 @@ async function callOpenAICompatProvider(
     return readChatMessageContent(data.choices?.[0]?.message?.content);
 }
 
-export async function callAI(prompt: string, settings: AISettings): Promise<string> {
+export async function callAI(prompt: string, settings: AISettings, taskType: PromptTaskType = 'resume'): Promise<string> {
     // Cancel any existing request
     cancelCurrentRequest();
     currentAbortController = new AbortController();
-    const messages = buildMessages(prompt, settings);
+    const messages = buildMessages(prompt, settings, taskType);
 
     const makeCall = async (): Promise<string> => {
         if (settings.provider === 'google') {
@@ -736,13 +765,13 @@ STEP 1 — KEYWORD EXTRACTION
 Identify the top 10-15 keywords and phrases from the JD (technical skills, tools, methodologies, domain terms). These are your target keywords.
 
 STEP 2 — SUMMARY REWRITE
-Rewrite the summary to naturally include the top 5 target keywords. Structure: "[X] years of experience in [domain] with expertise in [top 3 JD skills]. Proven track record of [strongest matching achievement]. [Career direction aligned with JD]."
+Rewrite the summary to naturally weave in the top 5 target keywords. Write it as a confident professional would introduce themselves — vary the structure, avoid formulaic templates like "X years of experience in Y with expertise in Z". Lead with what makes this candidate stand out for THIS specific role.
 
 STEP 3 — BULLET OPTIMIZATION
 For each experience entry:
 • Reorder bullets so the most JD-relevant ones come first.
-• Rewrite each bullet in STAR-lite format: strong action verb → what was done → measurable result or concrete outcome.
-• Front-load target keywords — place the most relevant JD term within the first 3 words of each bullet when natural.
+• Rewrite each bullet in STAR-lite format: action verb → what was done → measurable result or concrete outcome.
+• Naturally incorporate target keywords where they fit — do not force them into the first 3 words if it makes the sentence awkward.
 • Vary action verbs — never repeat the same verb in consecutive bullets.
 • Keep existing metrics. If a bullet has a number or percentage, preserve it and make it more prominent.
 
@@ -1118,7 +1147,7 @@ ${jobDescription || 'No job description provided. Write a strong general-purpose
 
 Return ONLY the JSON object, nothing else.`;
 
-    const response = await callAI(prompt, settings);
+    const response = await callAI(prompt, settings, 'cover-letter');
     const jsonStr = extractJSON(response);
 
     try {
@@ -1209,7 +1238,7 @@ ${jobDescription}
 
 Return format: ["keyword1", "keyword2", ...]`;
 
-    const response = await callAI(prompt, settings);
+    const response = await callAI(prompt, settings, 'keywords');
     const jsonStr = extractJSON(response);
 
     try {

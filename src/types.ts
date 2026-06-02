@@ -259,7 +259,7 @@ export interface ResumeEditLog {
 export const APP_CONSTANTS = {
   MAX_VERSIONS: 50,        // ← was 20; raised so old docs are never silently dropped
   MAX_OUTPUT_TOKENS: 8192,
-  AI_TEMPERATURE: 0.4,
+  AI_TEMPERATURE: 0.5,
   DEBOUNCE_DELAY_MS: 500,
 };
 

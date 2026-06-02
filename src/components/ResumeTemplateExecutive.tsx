@@ -71,7 +71,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
             <div className="re2-body">
                 {data.summary && (
                     <EditableResumeBlock data={data} editing={editing} block={{ type: 'summary' }} label="Profile" className="re2-section">
-                        <div className="re2-section-label">Profile</div>
+                        <h2 className="re2-section-label">Profile</h2>
                         <div className="re2-section-content">
                             <p className="re2-summary"><Linkify text={data.summary} /></p>
                         </div>
@@ -80,7 +80,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
 
                 {data.experiences?.length > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Experience</div>
+                        <h2 className="re2-section-label">Experience</h2>
                         <div className="re2-section-content">
                             {data.experiences.map((exp, i) => (
                                 <EditableResumeBlock
@@ -113,7 +113,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
 
                 {data.projects?.length > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Projects</div>
+                        <h2 className="re2-section-label">Projects</h2>
                         <div className="re2-section-content">
                             {data.projects.map((p, i) => (
                                 <EditableResumeBlock
@@ -141,7 +141,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
 
                 {data.skills && Object.keys(data.skills).length > 0 && (
                     <EditableResumeBlock data={data} editing={editing} block={{ type: 'skills' }} label="Skills" className="re2-section">
-                        <div className="re2-section-label">Skills</div>
+                        <h2 className="re2-section-label">Skills</h2>
                         <div className="re2-section-content">
                             <div className="re2-skills-grid">
                                 {Object.entries(data.skills).map(([cat, val]) =>
@@ -159,7 +159,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
 
                 {(data.education?.length ?? 0) > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Education</div>
+                        <h2 className="re2-section-label">Education</h2>
                         <div className="re2-section-content">
                             {data.education?.map((edu, i) => (
                                 <EditableResumeBlock
@@ -186,7 +186,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
 
                 {data.certifications?.length > 0 && (
                     <EditableResumeBlock data={data} editing={editing} block={{ type: 'certifications' }} label="Certifications" className="re2-section">
-                        <div className="re2-section-label">Certifications</div>
+                        <h2 className="re2-section-label">Certifications</h2>
                         <div className="re2-section-content">
                             <div className="re2-cert-list">
                                 {data.certifications.map((cert, i) => {
@@ -215,7 +215,7 @@ export const ResumeTemplateExecutive = memo(function ResumeTemplateExecutive({ d
                         label={s.title}
                         className="re2-section"
                     >
-                        <div className="re2-section-label">{s.title}</div>
+                        <h2 className="re2-section-label">{s.title}</h2>
                         <div className="re2-section-content">
                             <ul className="re2-bullets">
                                 {s.items.map((item, j) => <li key={j}><Linkify text={item} /></li>)}

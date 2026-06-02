@@ -27,7 +27,7 @@ export const CoverLetterTemplateModern = memo(function CoverLetterTemplateModern
         <div className="cover-letter-modern">
             <header className="cover-letter-modern-head">
                 <div>
-                    <div className="cover-letter-modern-name">{data.fullName || 'Candidate Name'}</div>
+                    <h1 className="cover-letter-modern-name">{data.fullName || 'Candidate Name'}</h1>
                     <div className="cover-letter-modern-title">{data.title || 'Professional Title'}</div>
                 </div>
                 {data.date && <div className="cover-letter-modern-date">{data.date}</div>}
@@ -44,7 +44,7 @@ export const CoverLetterTemplateModern = memo(function CoverLetterTemplateModern
             <div className="cover-letter-modern-rule" />
 
             <section className="cover-letter-modern-recipient">
-                <div className="cover-letter-modern-label">To</div>
+                <h2 className="cover-letter-modern-label">To</h2>
                 <div className="cover-letter-modern-recipient-copy">
                     <div>{data.recipientName || 'Hiring Manager'}</div>
                     <div>{data.recipientTitle || data.companyName}</div>
@@ -55,7 +55,7 @@ export const CoverLetterTemplateModern = memo(function CoverLetterTemplateModern
 
             {data.subject && (
                 <section className="cover-letter-modern-subject-row">
-                    <div className="cover-letter-modern-label">Subject</div>
+                    <h2 className="cover-letter-modern-label">Subject</h2>
                     <div className="cover-letter-modern-subject">{data.subject}</div>
                 </section>
             )}

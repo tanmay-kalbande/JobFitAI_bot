@@ -51,7 +51,7 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
     return (
         <div className="resume-modern">
             <EditableResumeBlock data={data} editing={editing} block={{ type: 'header' }} label="Header" className="rm-head">
-                <div className="rm-head-name">{data.fullName || 'Your Name'}</div>
+                <h1 className="rm-head-name">{data.fullName || 'Your Name'}</h1>
                 <div className="rm-head-title">{data.title || 'Your Title'}</div>
                 <div className="rm-head-contact">
                     {data.email && <span>{data.email}</span>}
@@ -72,14 +72,14 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
 
             {data.summary && (
                 <EditableResumeBlock data={data} editing={editing} block={{ type: 'summary' }} label="Summary" className="rm-section">
-                    <div className="rm-sec-label">Summary</div>
+                    <h2 className="rm-sec-label">Summary</h2>
                     <p className="rm-summary"><Linkify text={data.summary} /></p>
                 </EditableResumeBlock>
             )}
 
             {data.experiences && data.experiences.length > 0 && (
                 <section className="rm-section">
-                    <div className="rm-sec-label">Experience</div>
+                    <h2 className="rm-sec-label">Experience</h2>
                     {data.experiences.map((exp, expIdx) => (
                         <EditableResumeBlock
                             key={`${exp.jobTitle}-${exp.company}-${exp.duration}`}
@@ -108,7 +108,7 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
 
             {data.education && data.education.length > 0 && (
                 <section className="rm-section">
-                    <div className="rm-sec-label">Education</div>
+                    <h2 className="rm-sec-label">Education</h2>
                     {data.education.map((edu, eduIdx) => (
                         <EditableResumeBlock
                             key={`${edu.degree}-${edu.institution}-${edu.year}`}
@@ -131,7 +131,7 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
 
             {data.skills && Object.keys(data.skills).length > 0 && (
                 <EditableResumeBlock data={data} editing={editing} block={{ type: 'skills' }} label="Skills" className="rm-section">
-                    <div className="rm-sec-label">Skills</div>
+                    <h2 className="rm-sec-label">Skills</h2>
                     <table className="rm-skills-table" role="presentation">
                         <tbody>
                             {Object.entries(data.skills).map(([category, skills]) =>
@@ -149,7 +149,7 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
 
             {data.projects && data.projects.length > 0 && (
                 <section className="rm-section">
-                    <div className="rm-sec-label">Projects</div>
+                    <h2 className="rm-sec-label">Projects</h2>
                     {data.projects.map((project, projectIdx) => (
                         <EditableResumeBlock
                             key={`${project.title}-${project.description.slice(0, 30)}`}
@@ -180,7 +180,7 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
 
             {data.certifications && data.certifications.length > 0 && (
                 <EditableResumeBlock data={data} editing={editing} block={{ type: 'certifications' }} label="Certifications" className="rm-section">
-                    <div className="rm-sec-label">Certifications</div>
+                    <h2 className="rm-sec-label">Certifications</h2>
                     <div className="rm-cert-list">
                         {data.certifications.map((cert) => {
                             const pipeIdx = cert.indexOf('|');
@@ -209,7 +209,7 @@ export const ResumeTemplateModern = memo(function ResumeTemplateModern({ data, e
                             label={section.title}
                             className="rm-section"
                         >
-                            <div className="rm-sec-label">{section.title}</div>
+                            <h2 className="rm-sec-label">{section.title}</h2>
                             <ul className="rm-bullets">
                                 {(Array.isArray(section.items)
                                     ? section.items

@@ -69,7 +69,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
             <div className="re2-body">
                 {data.summary && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Professional Profile</div>
+                        <h2 className="re2-section-label">Professional Profile</h2>
                         <div className="re2-section-content">
                             <p className="re2-summary"><Linkify text={data.summary} /></p>
                         </div>
@@ -78,7 +78,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
 
                 {data.experiences?.length > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Professional Experience</div>
+                        <h2 className="re2-section-label">Professional Experience</h2>
                         <div className="re2-section-content">
                             {data.experiences.map((exp, i) => (
                                 <div key={i} className="re2-entry">
@@ -104,7 +104,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
 
                 {data.projects?.length > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Selected Projects</div>
+                        <h2 className="re2-section-label">Selected Projects</h2>
                         <div className="re2-section-content">
                             {data.projects.map((p, i) => (
                                 <div key={i} className="re2-entry">
@@ -124,7 +124,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
 
                 {data.skills && Object.keys(data.skills).length > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Core Competencies</div>
+                        <h2 className="re2-section-label">Core Competencies</h2>
                         <div className="re2-section-content">
                             <div className="re2-skills-grid">
                                 {Object.entries(data.skills).map(([cat, val]) =>
@@ -142,7 +142,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
 
                 {(data.education?.length ?? 0) > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Education</div>
+                        <h2 className="re2-section-label">Education</h2>
                         <div className="re2-section-content">
                             {data.education?.map((edu, i) => (
                                 <div key={i} className="re2-entry">
@@ -162,7 +162,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
 
                 {data.certifications?.length > 0 && (
                     <section className="re2-section">
-                        <div className="re2-section-label">Certifications</div>
+                        <h2 className="re2-section-label">Certifications</h2>
                         <div className="re2-section-content">
                             <div className="re2-cert-list">
                                 {data.certifications.map((cert, i) => {
@@ -183,7 +183,7 @@ export const CVTemplateExecutive = memo(function CVTemplateExecutive({ data }: C
 
                 {data.customSections?.filter(s => !s.title.toLowerCase().includes('certific')).map((s, i) => (
                     <section key={i} className="re2-section">
-                        <div className="re2-section-label">{s.title}</div>
+                        <h2 className="re2-section-label">{s.title}</h2>
                         <div className="re2-section-content">
                             <ul className="re2-bullets">
                                 {s.items.map((item, j) => <li key={j}><Linkify text={item} /></li>)}

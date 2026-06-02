@@ -2223,7 +2223,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .rm-head { margin-bottom: 30px; }
-.rm-head-name { font-size: 34px; font-weight: 600; letter-spacing: -0.8px; color: var(--rm-ink); line-height: 1.1; margin-bottom: 6px; }
+.rm-head-name { font-size: 34px; font-weight: 600; letter-spacing: -0.8px; color: var(--rm-ink); line-height: 1.1; margin: 0 0 6px; }
 .rm-head-title { font-size: 14px; color: var(--rm-ink2); font-weight: 400; margin-bottom: 16px; }
 .rm-head-contact { display: flex; flex-wrap: wrap; font-family: var(--font-mono); font-size: 11px; color: var(--rm-ink3); gap: 0; line-height: 1.8; }
 .rm-head-contact a { color: var(--rm-ink3); text-decoration: none; }
@@ -2231,7 +2231,7 @@ a { color: inherit; text-decoration: none; }
 .rm-sep { margin: 0 8px; color: var(--rm-rule); }
 
 .rm-section { margin-bottom: 28px; }
-.rm-sec-label { font-family: var(--font-mono); font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--rm-ink4); padding-bottom: 8px; border-bottom: 1px solid var(--rm-rule); margin-bottom: 16px; }
+.rm-sec-label { font-family: var(--font-mono); font-size: 9px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--rm-ink4); padding-bottom: 8px; border-bottom: 1px solid var(--rm-rule); margin: 0 0 16px; }
 .rm-summary { font-size: 13px; color: var(--rm-ink2); line-height: 1.8; font-weight: 300; }
 .rm-entry { margin-bottom: 20px; }
 .rm-entry:last-child { margin-bottom: 0; }
@@ -2294,14 +2294,14 @@ a { color: inherit; text-decoration: none; }
 }
 
 .cv-modern-head { display: flex; flex-direction: column; gap: 0.35rem; }
-.cv-modern-name { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.05em; color: #111827; }
+.cv-modern-name { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.05em; color: #111827; margin: 0; }
 .cv-modern-title { font-size: 1rem; color: #475569; }
 .cv-modern-contact { display: flex; flex-wrap: wrap; gap: 0.45rem 0.9rem; margin-top: 0.4rem; font-size: 0.8rem; color: #64748b; }
 .cv-modern-contact a, .cv-modern-link { color: #0f766e; text-decoration: none; }
 .cv-modern-divider { height: 1px; background: linear-gradient(90deg,rgba(15,23,42,.18),rgba(15,23,42,.04)); margin: 1.3rem 0 1.5rem; }
 
 .cv-modern-section { margin-top: 1.3rem; }
-.cv-modern-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: #0f766e; margin-bottom: 0.7rem; }
+.cv-modern-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: #0f766e; margin: 0 0 0.7rem; }
 .cv-modern-profile, .cv-modern-project, .cv-modern-bullets li, .cv-modern-cert-item { font-size: 0.84rem; line-height: 1.78; color: #334155; }
 .cv-modern-entry { margin-bottom: 0.9rem; }
 .cv-modern-top { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
@@ -2327,7 +2327,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .cover-letter-modern-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; }
-.cover-letter-modern-name { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.05em; color: #0f172a; }
+.cover-letter-modern-name { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.05em; color: #0f172a; margin: 0; }
 .cover-letter-modern-title { margin-top: 0.3rem; font-size: 1rem; color: #475569; }
 .cover-letter-modern-date { font-size: 0.8rem; font-family: 'DM Mono',monospace; color: #667085; white-space: nowrap; }
 .cover-letter-modern-contact { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; margin-top: 0.9rem; font-size: 0.8rem; color: #667085; }
@@ -2336,7 +2336,7 @@ a { color: inherit; text-decoration: none; }
 .cover-letter-modern-recipient,
 .cover-letter-modern-subject-row { display: grid; grid-template-columns: 100px 1fr; gap: 1rem; margin-top: 0.75rem; }
 
-.cover-letter-modern-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #2f5d62; }
+.cover-letter-modern-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #2f5d62; margin: 0; }
 .cover-letter-modern-recipient-copy, .cover-letter-modern-subject { font-size: 0.88rem; line-height: 1.7; color: #243041; }
 .cover-letter-modern-subject { font-weight: 700; color: #111827; }
 .cover-letter-modern-body { margin-top: 1.4rem; display: grid; gap: 1rem; }

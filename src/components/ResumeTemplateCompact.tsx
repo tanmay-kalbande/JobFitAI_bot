@@ -19,25 +19,16 @@ function isValidUrl(url: string): boolean {
   }
 }
 
-function truncate(text: string, maxChars: number): string {
-  if (!text) return '';
-  if (text.length <= maxChars) return text;
-  return `${text.slice(0, maxChars).trimEnd()}...`;
-}
+
 
 export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
   data,
   style = 'classic',
   editing,
 }: ResumeTemplateCompactProps) {
-  const MAX_JOBS = 3;
-  const MAX_BULLETS = 3;
-  const MAX_PROJECTS = 2;
-  const MAX_CERTS = 3;
-
-  const experiences = (data.experiences ?? []).slice(0, MAX_JOBS);
-  const projects = (data.projects ?? []).slice(0, MAX_PROJECTS);
-  const certs = (data.certifications ?? []).slice(0, MAX_CERTS);
+  const experiences = data.experiences ?? [];
+  const projects = data.projects ?? [];
+  const certs = data.certifications ?? [];
   const skillEntries = Object.entries(data.skills ?? {});
 
   const variant = style === 'modern' ? 'compact-modern' : style === 'executive' ? 'compact-executive' : 'compact-classic';
@@ -69,7 +60,7 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
 
       {data.summary && (
         <EditableResumeBlock data={data} editing={editing} block={{ type: 'summary' }} label="Summary" className="compact-summary-block">
-          <p className="compact-summary">{truncate(data.summary, 300)}</p>
+          <p className="compact-summary">{data.summary}</p>
         </EditableResumeBlock>
       )}
 
@@ -94,8 +85,8 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
                   <div className="compact-company">{exp.company}</div>
                   {exp.duties && exp.duties.length > 0 && (
                     <ul className="compact-duties">
-                      {exp.duties.slice(0, MAX_BULLETS).map((duty) => (
-                        <li key={duty.slice(0, 40)}>{truncate(duty, 120)}</li>
+                      {exp.duties.map((duty) => (
+                        <li key={duty.slice(0, 40)}>{duty}</li>
                       ))}
                     </ul>
                   )}
@@ -122,7 +113,7 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
                     ) : proj.title}
                   </span>
                   {' - '}
-                  <span className="compact-proj-desc">{truncate(proj.description, 100)}</span>
+                  <span className="compact-proj-desc">{proj.description}</span>
                 </EditableResumeBlock>
               ))}
             </section>
@@ -147,7 +138,7 @@ export const ResumeTemplateCompact = memo(function ResumeTemplateCompact({
           {data.education && data.education.length > 0 && (
             <section className="compact-section">
               <h2 className="compact-section-title">Education</h2>
-              {data.education.slice(0, 2).map((edu, eduIdx) => (
+              {data.education.map((edu, eduIdx) => (
                 <EditableResumeBlock
                   key={`${edu.degree}-${edu.institution}`}
                   data={data}

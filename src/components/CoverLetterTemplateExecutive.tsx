@@ -42,7 +42,7 @@ export const CoverLetterTemplateExecutive = memo(function CoverLetterTemplateExe
             <div className="re2-body">
                 {/* Date + Recipient */}
                 <section className="re2-section">
-                    <div className="re2-section-label">{data.date}</div>
+                    <h2 className="re2-section-label">{data.date}</h2>
                     <div className="re2-section-content">
                         <div style={{ fontSize: '14px', lineHeight: '1.65', color: '#1a1a1a' }}>
                             <div style={{ fontWeight: 700 }}>{data.recipientName || 'Hiring Manager'}</div>
@@ -60,7 +60,7 @@ export const CoverLetterTemplateExecutive = memo(function CoverLetterTemplateExe
 
                 {/* Letter body */}
                 <section className="re2-section">
-                    <div className="re2-section-label">Letter</div>
+                    <h2 className="re2-section-label">Letter</h2>
                     <div className="re2-section-content re2-letter-body">
                         <p>{data.greeting || 'Dear Hiring Manager,'}</p>
                         {data.opening && <p>{data.opening}</p>}

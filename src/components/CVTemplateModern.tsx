@@ -50,7 +50,7 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
     return (
         <div className="cv-modern">
             <header className="cv-modern-head">
-                <div className="cv-modern-name">{data.fullName || 'Candidate Name'}</div>
+                <h1 className="cv-modern-name">{data.fullName || 'Candidate Name'}</h1>
                 <div className="cv-modern-title">{data.title || 'Professional Title'}</div>
                 <div className="cv-modern-contact">
                     {data.email && <span>{data.email}</span>}
@@ -65,14 +65,14 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
 
             {data.summary && (
                 <section className="cv-modern-section">
-                    <div className="cv-modern-label">Professional Profile</div>
+                    <h2 className="cv-modern-label">Professional Profile</h2>
                     <p className="cv-modern-profile"><Linkify text={data.summary} /></p>
                 </section>
             )}
 
             {data.experiences?.length > 0 && (
                 <section className="cv-modern-section">
-                    <div className="cv-modern-label">Experience</div>
+                    <h2 className="cv-modern-label">Experience</h2>
                     {data.experiences.map((exp) => (
                         <article key={`${exp.jobTitle}-${exp.company}-${exp.duration}`} className="cv-modern-entry">
                             <div className="cv-modern-top">
@@ -94,7 +94,7 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
 
             {data.projects?.length > 0 && (
                 <section className="cv-modern-section">
-                    <div className="cv-modern-label">Selected Projects</div>
+                    <h2 className="cv-modern-label">Selected Projects</h2>
                     {data.projects.map((project) => (
                         <article key={`${project.title}-${project.description.slice(0, 30)}`} className="cv-modern-entry">
                             <div className="cv-modern-top">
@@ -118,7 +118,7 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
 
             {data.skills && Object.keys(data.skills).length > 0 && (
                 <section className="cv-modern-section">
-                    <div className="cv-modern-label">Core Competencies</div>
+                    <h2 className="cv-modern-label">Core Competencies</h2>
                     <div className="cv-modern-skills">
                         {Object.entries(data.skills).map(([category, skills]) => (
                             skills ? (
@@ -134,7 +134,7 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
 
             {(data.education?.length ?? 0) > 0 && (
                 <section className="cv-modern-section">
-                    <div className="cv-modern-label">Education</div>
+                    <h2 className="cv-modern-label">Education</h2>
                     {data.education?.map((edu) => (
                         <article key={`${edu.degree}-${edu.institution}-${edu.year}`} className="cv-modern-entry">
                             <div className="cv-modern-top">
@@ -152,7 +152,7 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
 
             {data.certifications?.length > 0 && (
                 <section className="cv-modern-section">
-                    <div className="cv-modern-label">Certifications</div>
+                    <h2 className="cv-modern-label">Certifications</h2>
                     <div className="cv-modern-cert-list">
                         {data.certifications.map(cert => (
                             <div key={cert} className="cv-modern-cert-item">{cert}</div>
@@ -163,7 +163,7 @@ export const CVTemplateModern = memo(function CVTemplateModern({ data }: CVTempl
 
             {data.customSections?.filter(section => !section.title.toLowerCase().includes('certific')).map(section => (
                 <section key={section.title} className="cv-modern-section">
-                    <div className="cv-modern-label">{section.title}</div>
+                    <h2 className="cv-modern-label">{section.title}</h2>
                     <ul className="cv-modern-bullets">
                         {section.items.map(item => <li key={item}><Linkify text={item} /></li>)}
                     </ul>
