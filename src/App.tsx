@@ -82,26 +82,31 @@ function buildPdfFileName(
   generatedCoverLetter: CoverLetterData | null,
   currentVersion: ResumeVersion | null
 ): string {
+  const genericCompanyValues = new Set(['general', 'company', 'target company', 'unknown company', 'hiring team']);
+  const genericRoleValues = new Set(['professional profile', 'position', 'role', 'target role', 'resume', 'cv']);
+  const getSpecificFilePart = (value: string | undefined, genericValues: Set<string>) => {
+    const cleaned = cleanAIText(value ?? '').trim();
+    if (!cleaned || genericValues.has(cleaned.toLowerCase())) return '';
+    return sanitizeFilePart(cleaned);
+  };
   const namePart = sanitizeFilePart(
     settings.userName || generatedResume?.fullName || generatedCoverLetter?.fullName || currentVersion?.data?.fullName || 'Candidate'
   );
+  const companyPart = getSpecificFilePart(currentVersion?.companyName, genericCompanyValues);
+  const rolePart = getSpecificFilePart(currentVersion?.jobTitle, genericRoleValues);
+  const suffix = [companyPart, rolePart].filter(Boolean).join('_');
 
   if (currentVersion?.type === 'tailored') {
-    const companyPart = sanitizeFilePart(currentVersion.companyShortName || currentVersion.companyName || 'Target_Company');
-    const rolePart = sanitizeFilePart(currentVersion.jobTitle || 'Target_Role');
-    return `${namePart}_Resume_${companyPart}_${rolePart}`;
+    return suffix ? `${namePart}_Resume_${suffix}` : `${namePart}_Resume_Target_Company_Target_Role`;
   }
   if (currentVersion?.type === 'cover-letter') {
-    const companyPart = sanitizeFilePart(currentVersion.companyShortName || currentVersion.companyName || '');
-    const rolePart = sanitizeFilePart(currentVersion.jobTitle || '');
-    const suffix = [companyPart, rolePart].filter(Boolean).join('_');
     return suffix ? `${namePart}_Cover_Letter_${suffix}` : `${namePart}_Cover_Letter`;
   }
   if (currentVersion?.type === 'cv') {
-    const companyPart = sanitizeFilePart(currentVersion.companyShortName || currentVersion.companyName || '');
-    const rolePart = sanitizeFilePart(currentVersion.jobTitle || '');
-    const suffix = [companyPart, rolePart].filter(Boolean).join('_');
     return suffix ? `${namePart}_CV_${suffix}` : `${namePart}_CV`;
+  }
+  if (currentVersion?.documentLayout === 'single-page') {
+    return suffix ? `${namePart}_Resume_${suffix}_One_Page` : `${namePart}_Resume_One_Page`;
   }
   if (currentVersion?.type === 'fixed') return `${namePart}_Resume`;
   return `${namePart}_Resume`;
@@ -602,7 +607,8 @@ function AppContent() {
     alignmentDetails?: { matchingPoints: string[]; missingPoints: string[] },
     model?: string,
     proofMap?: ResumeVersion['proofMap'],
-    documentLayout?: ResumeVersion['documentLayout']
+    documentLayout?: ResumeVersion['documentLayout'],
+    sourceJobDescription?: string
   ) => {
     let name = 'Base Resume';
     if (documentLayout === 'single-page' && companyName) name = `${companyName} - ${jobTitle || 'Resume'} One Page`;
@@ -618,7 +624,7 @@ function AppContent() {
       id: generateId(), name, timestamp: Date.now(), data, type,
       documentLayout,
       companyName, companyShortName, jobTitle,
-      jobDescription: jobDescription.trim() || undefined,
+      jobDescription: (sourceJobDescription ?? jobDescription).trim() || undefined,
       atsKeywords: keywords,
       changes, alignmentScore, alignmentDetails, proofMap, model,
     };
@@ -684,13 +690,35 @@ function AppContent() {
   const handleGenerateSinglePage = async () => {
     if (!resumeInput.trim()) { setError('Please enter your resume information'); return; }
     if (!validateSettings()) return;
-    if (!beginLoadingRequest('Condensing your resume to one page...')) return;
+    const singlePageJobDescription = jobDescription.trim();
+    if (!beginLoadingRequest(singlePageJobDescription ? 'Condensing and tuning your resume for the job...' : 'Condensing your resume to one page...')) return;
     try {
-      const result = await generateSinglePageResume(resumeInput, jobDescription, settings);
+      const result = await generateSinglePageResume(resumeInput, singlePageJobDescription, settings);
       const cleanedResume = applyProfileNameToResume(cleanResumeData(result.resume), settings.userName);
-      setGeneratedResume(cleanedResume); setGeneratedCoverLetter(null); setAtsKeywords([]);
-      saveVersion(cleanedResume, 'base', result.companyName, result.companyShortName, result.jobTitle,
-        result.changes, [], undefined, undefined, getModelUsed(), result.proofMap, 'single-page');
+      let keywords: string[] = [];
+      if (singlePageJobDescription && atsEnabled) {
+        setLoadingMessage('Extracting ATS keywords...');
+        keywords = await extractATSKeywords(singlePageJobDescription, settings);
+        setAtsKeywords(keywords);
+      } else {
+        setAtsKeywords([]);
+      }
+      setGeneratedResume(cleanedResume); setGeneratedCoverLetter(null);
+      saveVersion(
+        cleanedResume,
+        'base',
+        singlePageJobDescription ? result.companyName : undefined,
+        singlePageJobDescription ? result.companyShortName : undefined,
+        singlePageJobDescription ? result.jobTitle : undefined,
+        result.changes,
+        keywords,
+        undefined,
+        undefined,
+        getModelUsed(),
+        result.proofMap,
+        'single-page',
+        singlePageJobDescription
+      );
       setIsSinglePageMode(true);
       setResumeFormat('classic'); // reset to classic sub-style
       setActiveTab('preview'); setShowChanges(false); setShowProofMap(false);

@@ -710,7 +710,7 @@ export async function generateTailoredResume(
 
 RETURN a JSON object with this EXACT schema:
 {
-  "companyName": "string — extract from JD",
+  "companyName": "string — extract the full company or organization name from the JD. Do not return only an acronym unless the JD only gives an acronym",
   "companyShortName": "string — smart 3-letter uppercase abbreviation or stock ticker for the company",
   "jobTitle": "string — extract the exact job title from the JD",
   "alignmentScore": number (0-100),
@@ -867,19 +867,19 @@ export async function generateSinglePageResume(
 
 TASK: Return a JSON object following this EXACT schema:
 {
-  "companyName": "string — extract from JD if available, otherwise 'General'",
+  "companyName": "string — extract the full company or organization name from the JD if available, otherwise 'General'. Do not return only an acronym unless the JD only gives an acronym",
   "companyShortName": "string — 3-letter uppercase abbreviation. Use 'GEN' if no company",
   "jobTitle": "string — extract from JD if available, otherwise 'Professional Profile'",
   "proofMap": [
     {
-      "requirement": "specific job requirement or theme",
+      "requirement": "specific JD requirement if a JD is provided, otherwise a professional theme",
       "evidence": "best supporting evidence from the resume",
       "sourceSection": "Summary | Experience | Skills | Projects | Education | Certifications",
       "strength": "strong | moderate | gap",
       "reasoning": "1 sentence explanation"
     }
   ],
-  "changes": ["string — what was cut and why"],
+  "changes": ["string — what was cut or tuned, and why it improves the one-page resume"],
   "resume": {
     "fullName": "string",
     "title": "string",
@@ -902,6 +902,7 @@ TASK: Return a JSON object following this EXACT schema:
 }
 
 CONDENSING RULES (follow strictly):
+0. If a JD is provided, this is a job-tailored one-page resume: extract the company, job title, top requirements, and JD keywords first, then choose and rewrite only truthful resume content that best matches that JD.
 1. Summary: 2 sentences only. Lead with years of experience + domain. End with #1 achievement with a number.
 2. Experience: keep the 3 most recent/relevant jobs only. Each job: 3 bullets maximum. Each bullet: under 100 characters. Start with a strong action verb. Include one number per bullet where the source data has it.
 3. Skills: only list skills that appear in or are directly relevant to the job description (or top 5 per category if no JD). Skip generic soft skills.
@@ -910,7 +911,7 @@ CONDENSING RULES (follow strictly):
 6. Education: keep all but strip "details" field (set to "").
 7. customSections: always return empty array [].
 8. NEVER invent facts. All content must come from the source resume.
-9. If a JD is provided, bias all choices toward JD-relevant content.
+9. If a JD is provided, tune the summary, skills, experience bullet order, projects, proofMap, and changes toward that JD. If no JD is provided, create a strong general-purpose base one-page resume.
 10. Return ONLY valid JSON.
 11. Location should stay short. If the source resume says open/willing/available to relocate, output exactly "Open to relocate". Otherwise preserve the supplied city/region or leave it empty if absent.
 
@@ -964,7 +965,7 @@ export async function generateCV(
 
 TASK: Transform the source resume into a detailed CV. Return a JSON object with this EXACT schema:
 {
-  "companyName": "string — extract from JD if available, otherwise 'General'",
+  "companyName": "string — extract the full company or organization name from the JD if available, otherwise 'General'. Do not return only an acronym unless the JD only gives an acronym",
   "companyShortName": "string — smart 3-letter uppercase abbreviation. Use 'GEN' if no company",
   "jobTitle": "string — extract from JD if available, otherwise 'Professional Profile'",
   "proofMap": [
@@ -1087,7 +1088,7 @@ export async function generateCoverLetter(
 
 TASK: Write a SHORT cover letter (250-300 words total body). Return a JSON object with this EXACT schema:
 {
-  "companyName": "string — extract from JD if available, otherwise 'Company'",
+  "companyName": "string — extract the full company or organization name from the JD if available, otherwise 'Company'. Do not return only an acronym unless the JD only gives an acronym",
   "companyShortName": "string — smart 3-letter uppercase abbreviation. Use 'GEN' if no company",
   "jobTitle": "string — extract from JD if available, otherwise 'Target Role'",
   "proofMap": [
