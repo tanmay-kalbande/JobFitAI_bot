@@ -1042,39 +1042,49 @@ function AppContent() {
 
           <div className="header-right">
             <div className="sidebar-primary-actions">
-              <button className="icon-btn nav-action nav-action-primary" onClick={() => { setShowSettings(false); handleClearData(); }} title="Start New Resume">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <button
+                className="icon-btn nav-action nav-action-primary"
+                onClick={() => { setShowSettings(false); handleClearData(); }}
+                title="New Resume"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 5v14" /><path d="M5 12h14" />
                 </svg>
-                <span>New Resume</span>
-              </button>
-              <button className="icon-btn nav-action" onClick={() => { setShowSettings(false); setShowHome(true); }} title="Saved Documents">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span>Saved Docs</span>
+                <span>New</span>
               </button>
             </div>
 
             <div className="sidebar-data-section" ref={sidebarDataRef}>
-              <div className={`card collapsible-card sidebar-card ${isResumeCollapsed ? 'collapsed' : ''}`}>
-                <div className="card-header" onClick={() => setIsResumeCollapsed(!isResumeCollapsed)} style={{ cursor: 'pointer' }}>
+              {/* Base resume card */}
+              <div className={`sidebar-card ${isResumeCollapsed ? 'collapsed' : ''}`}>
+                <div
+                  className="card-header"
+                  onClick={() => setIsResumeCollapsed(!isResumeCollapsed)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="header-title">
                     <span className={`collapse-icon ${isResumeCollapsed ? 'collapsed' : ''}`}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="6,9 12,15 18,9" />
                       </svg>
                     </span>
                     <h3>Base Resume</h3>
                     {resumeInput && isResumeCollapsed && (
-                      <span className={`data-preview save-health-text save-health-${displayedSaveHealthStatus}`} title={saveHealthCopy.detail}>
+                      <span
+                        className={`data-preview save-health-text save-health-${displayedSaveHealthStatus}`}
+                        title={saveHealthCopy.detail}
+                      >
                         <span>{saveHealthCopy.compactLabel}</span>
                       </span>
                     )}
                   </div>
                   {resumeInput && !isResumeCollapsed && (
-                    <button className="text-btn" onClick={e => { e.stopPropagation(); handleClearData(); }}>Clear</button>
+                    <button
+                      className="text-btn"
+                      onClick={e => { e.stopPropagation(); handleClearData(); }}
+                    >
+                      Clear
+                    </button>
                   )}
                 </div>
                 {!isResumeCollapsed && (
@@ -1082,10 +1092,13 @@ function AppContent() {
                     <textarea
                       value={resumeInput}
                       onChange={e => setResumeInput(e.target.value)}
-                      placeholder="Paste all your resume details here...&#10;&#10;Include: contact info, work experience, skills, education, projects, certifications, etc."
+                      placeholder={`Paste all your resume details here...\n\nInclude: contact info, work experience, skills, education, projects, certifications, etc.`}
                     />
                     <div className="card-footer">
-                      <span className={`saved-indicator save-health-text save-health-${displayedSaveHealthStatus}`} title={saveHealthCopy.detail}>
+                      <span
+                        className={`saved-indicator save-health-text save-health-${displayedSaveHealthStatus}`}
+                        title={saveHealthCopy.detail}
+                      >
                         {saveHealthCopy.compactLabel}
                       </span>
                     </div>
@@ -1093,17 +1106,10 @@ function AppContent() {
                 )}
               </div>
 
+              {/* Document history */}
               {versions.length > 0 && (
                 <div className="sidebar-doc-history" aria-label="Generated documents">
-                  <div className="sdh-header">
-                    <span>Generated Docs</span>
-                    <button
-                      type="button"
-                      onClick={() => { setShowSettings(false); setShowHome(true); }}
-                    >
-                      View All
-                    </button>
-                  </div>
+                  <div className="sidebar-section-label">Recents</div>
                   <div className="sdh-list">
                     {versions.map(version => {
                       const typeInfo = getVersionTypeInfo(version);
@@ -1116,7 +1122,10 @@ function AppContent() {
                           onClick={() => handleQuickNavToVersion(version)}
                           title={`Open: ${version.name}`}
                         >
-                          <span className="sdh-marker" style={{ color: typeInfo.color, borderColor: `${typeInfo.color}66` }}>
+                          <span
+                            className="sdh-marker"
+                            style={{ color: typeInfo.color, borderColor: `${typeInfo.color}44` }}
+                          >
                             {typeInfo.marker}
                           </span>
                           <span className="sdh-copy">
@@ -1130,8 +1139,11 @@ function AppContent() {
                           {version.alignmentScore !== undefined && version.alignmentScore > 0 && (
                             <span
                               className="sdh-score-pill"
-                              style={{ color: getScoreColor(version.alignmentScore), borderColor: `${getScoreColor(version.alignmentScore)}55` }}
-                              title={`Job alignment score: ${version.alignmentScore}%`}
+                              style={{
+                                color: getScoreColor(version.alignmentScore),
+                                borderColor: `${getScoreColor(version.alignmentScore)}55`,
+                              }}
+                              title={`Alignment: ${version.alignmentScore}%`}
                             >
                               {version.alignmentScore}%
                             </span>
@@ -1144,7 +1156,7 @@ function AppContent() {
               )}
             </div>
 
-            {/* ── Sidebar footer with quick provider switcher ── */}
+            {/* ── Sidebar footer ── */}
             <div className="sidebar-footer" ref={qpsRef} style={{ position: 'relative' }}>
               {showQuickProvider && (
                 <QuickProviderSwitcher
@@ -1156,41 +1168,50 @@ function AppContent() {
                 />
               )}
 
-              {/* Provider badge — now opens quick switcher */}
               <button
                 className={`provider-badge sidebar-provider ${showQuickProvider ? 'active' : ''}`}
                 onClick={() => setShowQuickProvider(v => !v)}
                 title="Switch AI provider / model"
               >
                 <img src={providerIcon} alt={settings.provider} className="badge-icon" />
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
                   {getProviderLabel()}
                 </span>
-                {/* current model pill */}
                 <span style={{
-                  fontSize: '0.52rem', fontFamily: 'var(--font-mono)', color: 'var(--c-dim)',
-                  background: 'var(--c-surface)', border: '1px solid var(--c-border)',
-                  borderRadius: '4px', padding: '1px 5px', flexShrink: 0, maxWidth: '80px',
+                  fontSize: '0.5rem', fontFamily: 'var(--font-mono)', color: 'var(--c-dim)',
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)',
+                  borderRadius: '4px', padding: '1px 5px', flexShrink: 0, maxWidth: '72px',
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   {(PROVIDER_MODELS_MAP[settings.provider].find(m => m.value === (settings[PROVIDER_MODEL_KEY[settings.provider]] as string))?.label ?? '').replace(/\s*(Flash|Free|Instruct|Preview|Lite|Turbo|Versatile)/gi, m => m.trim()[0].toUpperCase()) || getModelUsed()?.split('/').pop()?.slice(0, 12)}
                 </span>
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ flexShrink: 0, opacity: 0.5 }}>
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ flexShrink: 0, opacity: 0.4 }}>
                   <polyline points={showQuickProvider ? '18 15 12 9 6 15' : '6 9 12 15 18 9'} />
                 </svg>
               </button>
 
-              {/* Settings icon button */}
               <button
                 className={`icon-btn nav-action sidebar-settings ${showSettings ? 'active' : ''}`}
                 onClick={() => { setShowQuickProvider(false); setShowHome(false); setShowSettings(true); }}
                 aria-label="Settings"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="3" />
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
                 <span>Settings</span>
+              </button>
+
+              <button
+                className="icon-btn nav-action"
+                onClick={() => { setShowSettings(false); setShowHome(true); }}
+                title="All saved documents"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <span>Saved Docs</span>
               </button>
             </div>
           </div>

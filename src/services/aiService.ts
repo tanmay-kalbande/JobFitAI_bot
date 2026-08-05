@@ -79,21 +79,24 @@ NON-NEGOTIABLE RULES:
 4. Maintain consistent formatting: uniform date formats, parallel bullet structure, and proper capitalization throughout.`;
 
 const SYSTEM_RESUME_WRITING = `
-WRITING STANDARDS:
-• Bullets follow the STAR-lite format: action verb → what was done → measurable result or concrete outcome. If no metric exists, describe the observable impact (e.g., "reduced manual effort", "improved team velocity").
-• Use active voice. Eliminate filler words ("responsible for", "helped with", "assisted in"). Every word must earn its place.
-• When a job description is provided, mirror its exact terminology where the resume already has supporting evidence.
-• Vary action verbs — never start two consecutive bullets with the same verb.
-• When tailoring, emphasize the strongest matching evidence already present before introducing any new phrasing.
-• If a job requirement is not supported by the resume, acknowledge the gap honestly — frame transferable skills where applicable but never pretend the candidate has direct experience they lack.
+WRITING STANDARDS — FOLLOW EXACTLY:
+
+• Every bullet MUST follow Impact-First STAR-lite: [strong action verb] + [what you built/led/shipped] + [measurable result OR observable impact]. If no metric exists, use a concrete, specific outcome — NEVER vague phrases like "improved performance" or "helped with tasks".
+• AGGRESSIVE REWRITING is required. Weak source bullets must be transformed:
+  - BAD: "Responsible for maintaining backend systems" → GOOD: "Maintained and optimized 4 Node.js backend services, cutting average API response time by 35%"
+  - BAD: "Worked on data pipelines" → GOOD: "Built ETL pipelines processing 2M+ daily records, enabling real-time dashboard reporting for 3 business units"
+  - BAD: "Helped team with deployments" → GOOD: "Automated weekly deployment workflow using GitHub Actions, reducing release cycle from 2 hours to 18 minutes"
+• Use active voice. Remove: "responsible for", "helped with", "assisted in", "worked on", "involved in", "participated in".
+• Start every bullet with a DIFFERENT strong verb. Vary across: Built, Shipped, Designed, Led, Reduced, Increased, Automated, Optimized, Delivered, Architected, Migrated, Integrated, Deployed, Refactored, Streamlined, Launched, Managed, Scaled, Collaborated, Implemented, Developed, Drove, Established, Mentored, Negotiated, Analyzed, Resolved.
+• PRESERVE all numbers, percentages, team sizes, and dollar amounts exactly. Make them MORE prominent — move them earlier in the bullet.
+• When a job description is provided, mirror its exact terminology and inject the top 5-7 JD keywords into the most relevant bullets naturally — not forced.
+• Vary sentence length and structure. A great resume does not have 10 bullets that all follow the same rhythm.
+• Avoid: spearheaded, orchestrated, pioneered, synergized, leveraged, revolutionized, championed, facilitated, fostered, utilized, cutting-edge, state-of-the-art, best-in-class, results-driven, detail-oriented, self-starter, thought leader.
 
 HUMAN TONE — CRITICAL:
-• Write the way a confident professional actually speaks — direct, specific, and conversational. Every bullet should sound like something the candidate would say in an interview, not like a press release or a corporate memo.
-• Vary sentence length and structure. Avoid starting every bullet with the same cadence.
-• Use plain, natural language. Prefer "built" over "architected", "led" over "spearheaded", "improved" over "revolutionized".
-
-BANNED resume buzzwords (never use these):
-spearheaded, orchestrated, pioneered, synergized, leveraged, revolutionized, championed, endeavored, facilitated, fostered, utilized, cutting-edge, state-of-the-art, world-class, best-in-class, proven track record, results-driven, detail-oriented, self-starter, thought leader, go-to person.`;
+• Write the way a confident professional actually speaks in an interview — direct, specific, and conversational. Not corporate. Not a press release.
+• Prefer: "built" over "architected", "led" over "spearheaded", "improved" over "revolutionized", "helped" over "facilitated".
+• If no supporting evidence exists for a JD requirement, note it honestly in missingPoints. NEVER fabricate.`;
 
 const SYSTEM_COVER_LETTER = `
 Write like a real human professional — direct, confident, never wordy. A cover letter is a conversation opener, not a summary of the resume.`;
@@ -767,13 +770,17 @@ Identify the top 10-15 keywords and phrases from the JD (technical skills, tools
 STEP 2 — SUMMARY REWRITE
 Rewrite the summary to naturally weave in the top 5 target keywords. Write it as a confident professional would introduce themselves — vary the structure, avoid formulaic templates like "X years of experience in Y with expertise in Z". Lead with what makes this candidate stand out for THIS specific role.
 
-STEP 3 — BULLET OPTIMIZATION
-For each experience entry:
-• Reorder bullets so the most JD-relevant ones come first.
-• Rewrite each bullet in STAR-lite format: action verb → what was done → measurable result or concrete outcome.
-• Naturally incorporate target keywords where they fit — do not force them into the first 3 words if it makes the sentence awkward.
-• Vary action verbs — never repeat the same verb in consecutive bullets.
-• Keep existing metrics. If a bullet has a number or percentage, preserve it and make it more prominent.
+STEP 3 — AGGRESSIVE BULLET OPTIMIZATION
+This is the most important step. Every bullet must be transformed into an Impact-First statement:
+• Format: [action verb] + [what specifically] + [result/metric or concrete observable outcome]
+• REWRITE weak bullets entirely — do not lightly polish:
+  - "Responsible for backend development" → "Built and maintained 3 REST APIs serving 50K+ daily requests, ensuring 99.9% uptime"
+  - "Worked on machine learning models" → "Trained and deployed a fraud-detection model that reduced false positives by 28%, saving $120K annually"
+  - "Helped with data analysis" → "Analyzed 6 months of clickstream data in Python to identify a checkout drop-off pattern, informing a redesign that lifted conversions by 12%"
+• Reorder bullets so the most JD-relevant ones appear first.
+• PRESERVE all existing numbers, percentages, and dollar figures — make them more prominent.
+• Naturally inject the top JD keywords — do not force them into awkward positions.
+• Start each bullet with a DIFFERENT strong action verb across the entire experience section.
 
 STEP 4 — SKILLS ALIGNMENT
 Reorder skills within each category so JD-matching skills appear first. Do not remove existing skills — only reorder. If the resume has skills that match JD terms but use different names, add the JD-exact synonym in parentheses (e.g., "JavaScript (JS)").
